@@ -1,0 +1,27 @@
+.students { width: min(100%, 1480px); margin: 0 auto; }
+.students__heading { margin-bottom: 24px; }
+.students__eyebrow { color: var(--app-brand) !important; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+.students__heading h1.ant-typography { margin: 8px 0; font-size: clamp(28px, 3vw, 40px); line-height: 1.2; letter-spacing: -.03em; }
+.students__heading p.ant-typography { max-width: 760px; margin: 0; color: var(--app-neutral-500); font-size: 15px; }
+.students__toolbar { display: grid; grid-template-columns: minmax(280px, 520px) 220px; gap: 12px; margin-bottom: 16px; }
+.students .ant-table-wrapper { overflow: hidden; border: 1px solid var(--app-neutral-200); border-radius: 8px; }
+.students__primary-cell { display: flex; flex-direction: column; gap: 4px; }
+.students__primary-cell strong { color: var(--app-neutral-900); }
+.students__primary-cell small { color: var(--app-neutral-500); }
+.students__clickable-row { cursor: pointer; }
+.students__clickable-row:focus-visible { outline: 3px solid var(--app-brand); outline-offset: -3px; }
+.students__mobile-list { display: grid; gap: 12px; }
+.students__mobile-card { display: grid; gap: 16px; padding: 16px; border: 1px solid var(--app-neutral-200); border-radius: 8px; background: var(--app-surface); }
+.students__mobile-card .ant-space { color: var(--app-neutral-600); font-size: 13px; }
+.students__form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.students__date-picker { width: 100%; }
+.students__detail { display: grid; gap: 24px; }
+.students__detail h4.ant-typography { margin: 0 0 8px; }
+.students__enrollment { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid var(--app-neutral-200); border-radius: 8px; }
+
+@media (max-width: 767px) {
+  .students__heading { align-items: stretch !important; flex-direction: column; }
+  .students__heading .ant-btn { width: 100%; }
+  .students__toolbar, .students__form-row { grid-template-columns: 1fr; }
+  .students__toolbar .ant-select { width: 100%; }
+}

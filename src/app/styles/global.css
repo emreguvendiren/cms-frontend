@@ -1,0 +1,24 @@
+* { box-sizing: border-box; }
+
+html, body { min-width: 320px; min-height: 100%; background: var(--app-canvas); }
+
+body { margin: 0; color: var(--app-neutral-900); }
+
+button, input { font: inherit; }
+
+::selection { color: var(--app-surface); background: var(--app-brand); }
+
+.app-notification .ant-notification-notice-message {
+  font-weight: 600;
+}
+
+.app-notification .ant-notification-notice-description {
+  line-height: 1.6;
+}
+
+.app-loading {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  background: var(--app-canvas);
+}

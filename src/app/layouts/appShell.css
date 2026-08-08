@@ -1,0 +1,68 @@
+.app-shell { min-height: 100svh; background: var(--app-canvas); }
+.app-shell__sider { position: sticky !important; top: 0; height: 100svh; overflow: hidden; background: var(--app-neutral-900) !important; }
+.app-shell__navigation { min-height: 100%; display: flex; flex-direction: column; padding: 24px 16px; color: var(--app-surface); background: var(--app-neutral-900); }
+.app-shell__navigation--collapsed { align-items: center; padding: 24px 12px; }
+.app-shell__brand { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 8px; margin-bottom: 40px; }
+.app-shell__brand-mark { display: grid; width: 48px; height: 40px; place-items: center; border: 1px solid var(--app-neutral-600); border-radius: 8px; background: var(--app-brand); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.app-shell__brand > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.app-shell__brand strong { font-size: 16px; }
+.app-shell__brand small, .app-shell__sider-footer small { color: var(--app-neutral-400); font-size: 11px; }
+.app-shell__navigation--collapsed .app-shell__brand { justify-content: center; padding: 0; margin-bottom: 32px; }
+.app-shell__navigation--collapsed .app-shell__brand > span:last-child,
+.app-shell__navigation--collapsed .app-shell__nav-label,
+.app-shell__navigation--collapsed .app-shell__sider-footer > span:last-child { display: none; }
+.app-shell__nav-label { padding: 0 12px; margin-bottom: 8px; color: var(--app-neutral-400) !important; font-size: 10px; font-weight: 700; letter-spacing: .14em; }
+.app-shell__menu { border-inline-end: 0 !important; background: transparent !important; }
+.app-shell__menu .ant-menu-item { margin-inline: 0; width: 100%; }
+.app-shell__menu .ant-menu-item-selected { background: var(--app-brand) !important; color: var(--app-surface) !important; }
+.app-shell__navigation--collapsed .app-shell__menu { width: 56px; }
+.app-shell__navigation--collapsed .app-shell__menu .ant-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding-inline: 0 !important;
+  margin: 4px auto;
+  border-radius: 8px;
+}
+.app-shell__navigation--collapsed .app-shell__menu .ant-menu-item-icon {
+  margin-inline-end: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+.app-shell__navigation--collapsed .app-shell__menu .ant-menu-title-content { display: none; }
+.app-shell__sider-footer { display: flex; align-items: center; gap: 10px; padding: 20px 12px 0; margin-top: auto; border-top: 1px solid var(--app-neutral-700); }
+.app-shell__sider-footer > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.app-shell__navigation--collapsed .app-shell__sider-footer { justify-content: center; width: 100%; padding: 20px 0 0; }
+.app-shell__system-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--app-success); }
+.app-shell__header { position: sticky; z-index: 10; top: 0; height: 72px; padding: 0 32px; border-bottom: 1px solid var(--app-neutral-200); background: var(--app-surface) !important; }
+.app-shell__header > .ant-flex { height: 100%; }
+.app-shell__header-main { min-width: 0; flex: 1 1 auto; }
+.app-shell__header-actions { flex: 0 0 auto; }
+.app-shell__title-block { min-width: 0; }
+.app-shell__header-label { color: var(--app-brand) !important; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.app-shell__header h4.ant-typography { max-width: 100%; margin: 0; overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.app-shell__navigation-toggle { color: var(--app-neutral-700); }
+.app-shell__profile { display: inline-flex; align-items: center; gap: 8px; height: 48px; color: var(--app-neutral-700); }
+.app-shell__profile > span:not(.ant-avatar) { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+.app-shell__content { min-width: 0; padding: 32px; }
+.app-shell__drawer .ant-drawer-body { padding: 0; background: var(--app-neutral-900); }
+
+@media (max-width: 767px) {
+  .app-shell__header { height: 64px; padding: 0 16px; }
+  .app-shell__header-label, .app-shell__header h4.ant-typography { display: none; }
+  .app-shell__content { padding: 24px 16px; }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+  .app-shell__header { padding: 0 24px; }
+  .app-shell__header h4.ant-typography { display: none; }
+  .app-shell__profile { max-width: 48px; padding-inline: 8px; }
+  .app-shell__profile > span:not(.ant-avatar),
+  .app-shell__profile .anticon-down { display: none; }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .app-shell__header h4.ant-typography { display: none; }
+}
