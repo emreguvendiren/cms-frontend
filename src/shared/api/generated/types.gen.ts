@@ -176,10 +176,21 @@ export type ClassPage = PageMetadata & {
 
 export type StudentStatus = 'ACTIVE' | 'PROSPECTIVE' | 'INACTIVE';
 
+export type Gender = 'FEMALE' | 'MALE' | 'NOT_SPECIFIED';
+
 export type CreateStudentRequest = {
     fullName: string;
     email: string;
     phone: string;
+    /**
+     * Turkish national identity number. Stored encrypted and never returned as plaintext.
+     */
+    identityNumber: string;
+    birthPlace?: string | null;
+    birthDate?: string | null;
+    fatherName?: string | null;
+    motherName?: string | null;
+    gender: Gender;
     status: StudentStatus;
     activeCourse?: string | null;
     registrationDate: string;
@@ -187,6 +198,10 @@ export type CreateStudentRequest = {
     kvkkConsent: boolean;
     inactiveReason?: string | null;
     expectedStartDate?: string | null;
+    educationLevel?: string | null;
+    schoolName?: string | null;
+    profession?: string | null;
+    address?: string | null;
 };
 
 export type UpdateStudentRequest = CreateStudentRequest & {
@@ -194,6 +209,10 @@ export type UpdateStudentRequest = CreateStudentRequest & {
      * Omit or leave blank to preserve the current encrypted value
      */
     phone?: string | null;
+    /**
+     * Omit or leave blank to preserve the current encrypted value
+     */
+    identityNumber?: string | null;
     version: number;
 };
 
@@ -203,6 +222,13 @@ export type Student = {
     email: string;
     phoneAvailable: boolean;
     phoneMasked: string;
+    identityNumberAvailable: boolean;
+    identityNumberMasked: string;
+    birthPlace?: string | null;
+    birthDate?: string | null;
+    fatherName?: string | null;
+    motherName?: string | null;
+    gender: Gender;
     status: StudentStatus;
     activeCourse?: string | null;
     registrationDate: string;
@@ -210,6 +236,10 @@ export type Student = {
     kvkkConsent: boolean;
     inactiveReason?: string | null;
     expectedStartDate?: string | null;
+    educationLevel?: string | null;
+    schoolName?: string | null;
+    profession?: string | null;
+    address?: string | null;
     version: number;
 };
 

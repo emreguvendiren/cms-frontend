@@ -1,1 +1,1 @@
-export type { Student, StudentStatus } from "../../../shared/api/generated";
+export type { Gender, Student, StudentStatus } from "../../../shared/api/generated";
