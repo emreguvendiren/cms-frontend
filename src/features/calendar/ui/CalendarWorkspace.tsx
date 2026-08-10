@@ -20,6 +20,7 @@ type CalendarState =
   | { status: "success"; classes: CourseClass[] };
 
 type CalendarStatus = CourseClass["status"] | "ALL";
+type SelectedScope = "date" | "month";
 
 const statusLabels: Record<CourseClass["status"], string> = {
   ENROLLMENT_OPEN: "Kayıt açık",
@@ -38,6 +39,7 @@ export function CalendarWorkspace(): JSX.Element {
   const [state, setState] = useState<CalendarState>({ status: "loading" });
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
+  const [panelMode, setPanelMode] = useState<"month" | "year">("month");
   const [status, setStatus] = useState<CalendarStatus>("ALL");
 
   useEffect(() => {
@@ -53,10 +55,12 @@ export function CalendarWorkspace(): JSX.Element {
     () => classes.filter((item) => status === "ALL" || item.status === status),
     [classes, status],
   );
+  const selectedScope: SelectedScope = panelMode === "year" ? "month" : "date";
   const selectedClasses = useMemo(
-    () => visibleClasses.filter((item) => includesDate(item, selectedDate)),
-    [selectedDate, visibleClasses],
+    () => visibleClasses.filter((item) => selectedScope === "date" ? includesDate(item, selectedDate) : overlapsMonth(item, selectedDate)),
+    [selectedDate, selectedScope, visibleClasses],
   );
+  const hasSelectedClasses = selectedClasses.length > 0;
 
   return (
     <section className="class-calendar" aria-labelledby="class-calendar-title">
@@ -78,17 +82,18 @@ export function CalendarWorkspace(): JSX.Element {
       {state.status === "error" && <StatusLine tone="error" title="Ders takvimi yüklenemedi" description="Sınıf bilgilerini yeniden yükleyerek devam edebilirsiniz." action={<Button onClick={() => { setState({ status: "loading" }); setReloadKey((value) => value + 1); }}>Tekrar dene</Button>} />}
       {state.status === "loading" && <div className="class-calendar__loading" role="status" aria-label="Ders takvimi yükleniyor"><Skeleton active paragraph={{ rows: 8 }} /></div>}
       {state.status === "success" && (
-        <div className="class-calendar__layout">
+        <div className={`class-calendar__layout${hasSelectedClasses ? "" : " class-calendar__layout--full"}`}>
           <div className="class-calendar__surface">
             <Calendar
               value={selectedDate}
               fullscreen={screens.md === true}
-              onSelect={(date, info) => { if (info.source === "date") setSelectedDate(date); }}
+              onPanelChange={(date, mode) => { setSelectedDate(date); setPanelMode(mode); }}
+              onSelect={(date, info) => { if (info.source === "date" || info.source === "month") setSelectedDate(date); }}
               cellRender={(date, info) => info.type === "date" ? <CalendarCell date={date} classes={visibleClasses} /> : info.originNode}
             />
             {visibleClasses.length === 0 && <div className="class-calendar__empty"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={classes.length === 0 ? "Takvimde gösterilecek sınıf bulunmuyor." : "Bu filtreye uygun sınıf bulunmuyor."} /></div>}
           </div>
-          <SelectedDay date={selectedDate} classes={selectedClasses} />
+          {hasSelectedClasses && <SelectedClasses date={selectedDate} scope={selectedScope} classes={selectedClasses} />}
         </div>
       )}
     </section>
@@ -112,19 +117,20 @@ function CalendarCell({ date, classes }: { date: Dayjs; classes: CourseClass[] }
   );
 }
 
-function SelectedDay({ date, classes }: { date: Dayjs; classes: CourseClass[] }): JSX.Element {
+function SelectedClasses({ date, scope, classes }: { date: Dayjs; scope: SelectedScope; classes: CourseClass[] }): JSX.Element {
   return (
-    <aside className="class-calendar__day" aria-labelledby="selected-day-title">
+    <aside className="class-calendar__day" aria-labelledby="selected-day-title" aria-label={scope === "date" ? "Seçili gün sınıfları" : "Seçili ay sınıfları"}>
       <div className="class-calendar__day-heading">
         <CalendarOutlined aria-hidden="true" />
-        <div><Typography.Text type="secondary">Seçili gün</Typography.Text><Typography.Title id="selected-day-title" level={4}>{date.format("D MMMM YYYY")}</Typography.Title></div>
+        <div>
+          <Typography.Text type="secondary">{scope === "date" ? "Seçili gün" : "Seçili ay"}</Typography.Text>
+          <Typography.Title id="selected-day-title" level={4}>{scope === "date" ? date.format("D MMMM YYYY") : date.format("MMMM YYYY")}</Typography.Title>
+        </div>
         <Tag>{classes.length} sınıf</Tag>
       </div>
-      {classes.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Bu tarihte devam eden sınıf yok." /> : (
-        <div className="class-calendar__day-list">
-          {classes.map((item) => <ClassSummary key={item.id} item={item} />)}
-        </div>
-      )}
+      <div className="class-calendar__day-list">
+        {classes.map((item) => <ClassSummary key={item.id} item={item} />)}
+      </div>
     </aside>
   );
 }
@@ -138,7 +144,7 @@ function ClassSummary({ item }: { item: CourseClass }): JSX.Element {
         <div><Typography.Text type="secondary">{item.courseName}</Typography.Text><strong>{item.name}</strong></div>
         <Tag className={`class-calendar__status class-calendar__status--${item.status.toLocaleLowerCase()}`} icon={completed ? <CheckCircleOutlined /> : <ClockCircleOutlined />}>{statusLabels[item.status]}</Tag>
       </Flex>
-      <div className="class-calendar__meta"><span><UserOutlined aria-hidden="true" />{item.instructorName}</span><span><CalendarOutlined aria-hidden="true" />{formatDate(item.startDate)} – {formatDate(item.endDate)}</span></div>
+      <div className="class-calendar__meta"><span><UserOutlined aria-hidden="true" />{item.instructorName}</span><span><CalendarOutlined aria-hidden="true" />{formatDate(item.startDate)} - {formatDate(item.endDate)}</span></div>
       <div className="class-calendar__occupancy"><Flex justify="space-between"><span><TeamOutlined aria-hidden="true" /> Doluluk</span><strong>{item.enrolledCount}/{item.capacity}</strong></Flex><Progress percent={occupancy} showInfo={false} size="small" /></div>
     </article>
   );
@@ -146,6 +152,12 @@ function ClassSummary({ item }: { item: CourseClass }): JSX.Element {
 
 function includesDate(item: CourseClass, date: Dayjs): boolean {
   return !date.isBefore(dayjs(item.startDate), "day") && !date.isAfter(dayjs(item.endDate), "day");
+}
+
+function overlapsMonth(item: CourseClass, date: Dayjs): boolean {
+  const monthStart = date.startOf("month");
+  const monthEnd = date.endOf("month");
+  return !monthEnd.isBefore(dayjs(item.startDate), "day") && !monthStart.isAfter(dayjs(item.endDate), "day");
 }
 
 function formatDate(value: string): string {

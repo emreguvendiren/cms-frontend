@@ -32,7 +32,6 @@ export type ClassStatus = 'ENROLLMENT_OPEN' | 'PLANNED' | 'IN_PROGRESS' | 'COMPL
 
 export type CreateCourseRequest = {
     name: string;
-    category: string;
     durationHours: number;
     listPrice: number;
     status: CourseStatus;
@@ -63,7 +62,6 @@ export type Course = {
     id: string;
     code: string;
     name: string;
-    category: string;
     durationHours: number;
     listPrice: number;
     status: CourseStatus;

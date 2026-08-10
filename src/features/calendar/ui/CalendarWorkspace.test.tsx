@@ -44,14 +44,14 @@ describe("CalendarWorkspace", () => {
     expect(screen.getAllByText(currentClass.name).length).toBeGreaterThan(1);
   });
 
-  it("durum filtresine uymayan sınıfları takvimden kaldırır", async () => {
+  it("durum filtresine uymayan sınıfları takvimden kaldırır ve sağ paneli kapatır", async () => {
     const user = userEvent.setup();
     renderCalendar();
     await screen.findByText(currentClass.courseName);
     await user.click(screen.getByRole("combobox", { name: "Sınıf durumuna göre filtrele" }));
     await user.click(await screen.findByText("Planlandı"));
     expect(await screen.findByText("Bu filtreye uygun sınıf bulunmuyor.")).toBeVisible();
-    expect(screen.getByText("Bu tarihte devam eden sınıf yok.")).toBeVisible();
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
 
   it("yükleme hatasında yeniden deneme olanağı sunar", async () => {

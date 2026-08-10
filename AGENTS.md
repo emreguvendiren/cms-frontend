@@ -31,6 +31,8 @@
 - Do not define large components containing data access, transformation,
   business rules and presentation together.
 - Extract custom hooks for reusable stateful behavior, not for every function.
+- Monetary input fields must display thousands separators in the UI while
+  preserving numeric form values for API requests.
 
 ## Render performance
 

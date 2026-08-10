@@ -5,6 +5,7 @@
 .class-calendar__heading p.ant-typography { margin: 0; color: var(--app-neutral-500); font-size: 15px; }
 .class-calendar__filter { width: 200px; }
 .class-calendar__layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: 24px; }
+.class-calendar__layout--full { grid-template-columns: minmax(0, 1fr); }
 .class-calendar__surface, .class-calendar__day { border: 1px solid var(--app-neutral-200); border-radius: 12px; background: var(--app-surface); }
 .class-calendar__surface { min-width: 0; overflow: hidden; }
 .class-calendar__surface .ant-picker-calendar-header { padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }

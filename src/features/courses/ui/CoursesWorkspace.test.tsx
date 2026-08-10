@@ -8,7 +8,7 @@ const api = vi.hoisted(() => ({ loadCourses: vi.fn(), loadClasses: vi.fn(), load
 vi.mock("../api/trainingApi", () => api);
 
 const admin = { id: "admin", email: "admin@admin.com", authorities: ["course:create", "course:update", "course:delete", "class:create", "class:update", "class:delete", "class:enrollment:create", "class:enrollment:update", "class:enrollment:delete"] };
-const course = { id: "56d11b06-09d2-4fdf-a286-35f499c4fd50", code: "KRS-001", name: "AutoCAD 2D Teknik Çizim", category: "Teknik Tasarım", durationHours: 48, listPrice: 12500, status: "ACTIVE", version: 0 };
+const course = { id: "56d11b06-09d2-4fdf-a286-35f499c4fd50", code: "KRS-001", name: "AutoCAD 2D Teknik Çizim", durationHours: 48, listPrice: 12500, status: "ACTIVE", version: 0 };
 const courseClass = { id: "50286120-df69-49c8-b803-5dfdd9a98287", code: "SNF-041", name: "AutoCAD Hafta İçi Akşam", courseId: course.id, courseCode: course.code, courseName: course.name, instructorName: "Murat Aydın", startDate: "2026-08-10", endDate: "2026-09-02", capacity: 14, enrolledCount: 1, status: "ENROLLMENT_OPEN", version: 0 };
 const page = <T,>(content: T[]) => ({ content, page: 0, size: 8, totalElements: content.length, totalPages: content.length ? 1 : 0, first: true, last: true });
 
@@ -33,6 +33,8 @@ describe("CoursesWorkspace", () => {
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).queryByLabelText("Kurs kodu")).not.toBeInTheDocument();
     expect(within(dialog).getByLabelText("Durum")).toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText("Liste fiyatı (₺)"), "12500");
+    expect(within(dialog).getByLabelText("Liste fiyatı (₺)")).toHaveDisplayValue("12.500");
   });
 
   it("kurs düzenleme aksiyonunu gerçek endpoint wrapperına bağlar", async () => {
@@ -75,6 +77,7 @@ describe("CoursesWorkspace", () => {
     expect(await screen.findByText(/Aday öğrenci kayıtla birlikte aktifleşir/)).toBeInTheDocument();
     await user.click(await screen.findByText("Elif Yılmaz"));
     await user.type(screen.getByLabelText("Kayıt ücreti"), "18500");
+    expect(screen.getByLabelText("Kayıt ücreti")).toHaveDisplayValue("18.500");
     await user.click(screen.getByLabelText("Tahmini ödeme tarihi"));
     await user.click(screen.getByTitle("2026-08-20"));
     await user.type(screen.getByPlaceholderText("Ödeme anlaşması veya kayıtla ilgili önemli açıklama"), "Ön kayıt görüşmesi yapıldı.");
