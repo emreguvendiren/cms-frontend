@@ -95,7 +95,44 @@ describe("CoursesWorkspace", () => {
     await user.click(screen.getByText("Taksitli"));
     expect(screen.getByLabelText("Taksit sayısı")).toBeInTheDocument();
     expect(screen.getByLabelText("İlk ödeme tarihi")).toBeInTheDocument();
+    await user.click(screen.getByLabelText("Ödeme durumu"));
+    expect(screen.getByRole("option", { name: "Ödeme bekliyor" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Ödeme tamamlandı" })).not.toBeInTheDocument();
   });
+
+  it("senetli kayıtta senet bilgilerini toplayıp senet planı olarak gönderir", async () => {
+    const user = userEvent.setup(); renderWorkspace();
+    await user.click(screen.getByRole("tab", { name: /Sınıflar/ }));
+    await screen.findByText(courseClass.name);
+    await user.click(screen.getByRole("button", { name: /Öğrenci kaydet/ }));
+    await user.click(await screen.findByText("Elif Yılmaz"));
+    await user.type(screen.getByLabelText("Kayıt ücreti"), "24000");
+    await user.click(screen.getByText("Senet"));
+    expect(screen.getByLabelText("Senet adedi")).toBeInTheDocument();
+    expect(screen.getByLabelText("İlk senet vadesi")).toBeInTheDocument();
+    await user.click(screen.getByLabelText("Senet adedi"));
+    await user.click(await screen.findByText("4 senet"));
+    await user.click(screen.getByLabelText("İlk senet vadesi"));
+    await user.click(screen.getByTitle("2026-08-20"));
+    await user.type(screen.getByLabelText("Senet borçlusu"), "Elif Yılmaz");
+    await user.type(screen.getByLabelText(/Kefil/), "Ayşe Yılmaz");
+    await user.type(screen.getByLabelText("Düzenleme yeri"), "İzmir");
+    await user.type(screen.getByLabelText(/Başlangıç senet no/), "SN-100");
+    await user.click(screen.getByRole("button", { name: /Öğrenciyi sınıfa kaydet/ }));
+    expect(api.enrollStudent).toHaveBeenCalledWith(courseClass.id, expect.objectContaining({
+      studentId: "student-2",
+      registrationFee: 24000,
+      paymentPlan: "PROMISSORY_NOTE",
+      installmentCount: 4,
+      firstPaymentDate: "2026-08-20",
+      expectedPaymentDate: null,
+      note: expect.stringContaining("Senetli kayıt"),
+    }));
+    expect(api.enrollStudent.mock.calls[0][1].note).toContain("Borçlu: Elif Yılmaz");
+    expect(api.enrollStudent.mock.calls[0][1].note).toContain("Kefil: Ayşe Yılmaz");
+    expect(api.enrollStudent.mock.calls[0][1].note).toContain("Düzenleme yeri: İzmir");
+    expect(api.enrollStudent.mock.calls[0][1].note).toContain("Senet başlangıç no: SN-100");
+  }, 15000);
 
   it("sınıf işlemlerinde öğrenci kaydet, düzenle ve sil aksiyonlarını yan yana gösterir", async () => {
     const user = userEvent.setup(); renderWorkspace();

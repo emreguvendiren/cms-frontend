@@ -1,7 +1,7 @@
 import { getAccessToken } from "../../auth";
 import { environment } from "../../../shared/config/environment";
 import { createStudent as createRequest, deleteStudent as deleteRequest, listStudents as listRequest,
-  revealStudentPhone as revealRequest, updateStudent as updateRequest,
+  revealStudentIdentityNumber as revealIdentityNumberRequest, revealStudentPhone as revealRequest, updateStudent as updateRequest,
   type CreateStudentRequest, type Student, type StudentPage, type StudentStatus, type UpdateStudentRequest,
 } from "../../../shared/api/generated";
 
@@ -19,5 +19,8 @@ export async function updateStudent(id: string, body: UpdateStudentRequest): Pro
 export async function removeStudent(id: string): Promise<void> { await deleteRequest({ ...options(), path: { studentId: id } }); }
 export async function revealStudentPhone(id: string): Promise<string> {
   return (await revealRequest({ ...options(), path: { studentId: id } })).data.phone;
+}
+export async function revealStudentIdentityNumber(id: string): Promise<string> {
+  return (await revealIdentityNumberRequest({ ...options(), path: { studentId: id } })).data.identityNumber;
 }
 export type { CreateStudentRequest, Student, StudentStatus, UpdateStudentRequest } from "../../../shared/api/generated";

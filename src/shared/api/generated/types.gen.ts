@@ -117,7 +117,7 @@ export type ReceiveEnrollmentPaymentRequest = {
     version: number;
 };
 
-export type PaymentPlanType = 'CASH' | 'INSTALLMENT';
+export type PaymentPlanType = 'CASH' | 'INSTALLMENT' | 'PROMISSORY_NOTE';
 
 export type PaymentStatus = 'PENDING' | 'COMPLETED';
 
@@ -126,13 +126,16 @@ export type CreateClassEnrollmentRequest = {
     registrationFee: number;
     paymentPlan: PaymentPlanType;
     /**
-     * Required only when paymentPlan is INSTALLMENT; must be absent for CASH.
+     * Required when paymentPlan is INSTALLMENT or PROMISSORY_NOTE; must be absent for CASH.
      */
     installmentCount?: number | null;
     /**
-     * Required only when paymentPlan is INSTALLMENT; must be absent for CASH.
+     * Required when paymentPlan is INSTALLMENT or PROMISSORY_NOTE; must be absent for CASH.
      */
     firstPaymentDate?: string | null;
+    /**
+     * Must be PENDING when paymentPlan is INSTALLMENT or PROMISSORY_NOTE; CASH may be PENDING or COMPLETED.
+     */
     paymentStatus: PaymentStatus;
     /**
      * Required only for pending cash payments; must be absent otherwise.
@@ -146,6 +149,9 @@ export type UpdateClassEnrollmentRequest = {
     paymentPlan: PaymentPlanType;
     installmentCount?: number | null;
     firstPaymentDate?: string | null;
+    /**
+     * Must be PENDING when paymentPlan is INSTALLMENT or PROMISSORY_NOTE; CASH may be PENDING or COMPLETED.
+     */
     paymentStatus: PaymentStatus;
     expectedPaymentDate?: string | null;
     note?: string | null;
@@ -249,6 +255,10 @@ export type StudentPage = PageMetadata & {
 
 export type PhoneRevealResponse = {
     phone: string;
+};
+
+export type IdentityNumberRevealResponse = {
+    identityNumber: string;
 };
 
 export type LoginRequest = {
@@ -1144,6 +1154,45 @@ export type RevealStudentPhoneResponses = {
 };
 
 export type RevealStudentPhoneResponse = RevealStudentPhoneResponses[keyof RevealStudentPhoneResponses];
+
+export type RevealStudentIdentityNumberData = {
+    body?: never;
+    path: {
+        studentId: string;
+    };
+    query?: never;
+    url: '/api/students/{studentId}/identity-number/reveal';
+};
+
+export type RevealStudentIdentityNumberErrors = {
+    /**
+     * Invalid request
+     */
+    400: ApiError;
+    /**
+     * Authentication failed
+     */
+    401: ApiError;
+    /**
+     * Authenticated user lacks the required authority
+     */
+    403: ApiError;
+    /**
+     * Referenced resource was not found
+     */
+    404: ApiError;
+};
+
+export type RevealStudentIdentityNumberError = RevealStudentIdentityNumberErrors[keyof RevealStudentIdentityNumberErrors];
+
+export type RevealStudentIdentityNumberResponses = {
+    /**
+     * Plaintext identity number; response must not be cached
+     */
+    200: IdentityNumberRevealResponse;
+};
+
+export type RevealStudentIdentityNumberResponse = RevealStudentIdentityNumberResponses[keyof RevealStudentIdentityNumberResponses];
 
 export type GetCsrfTokenData = {
     body?: never;

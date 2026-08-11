@@ -44,6 +44,7 @@
 .courses__payment-form { padding-left: 32px; border-left: 1px solid var(--app-neutral-200); }
 .courses__payment-form .ant-form-item { margin-bottom: 0; }
 .courses__payment-row { display: grid; grid-template-columns: minmax(120px, .7fr) minmax(180px, 1.3fr); gap: 16px; }
+.courses__promissory-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .courses__money-input { width: 100%; }
 .courses__enrollment-context { display: grid; gap: 4px; }
 .courses__enrollment-toolbar { display: grid; grid-template-columns: minmax(240px, 1fr) auto; gap: 12px; }
@@ -87,4 +88,5 @@
   .courses__candidate-status { margin-left: 0; }
   .courses__selection-summary { align-items: flex-start; flex-direction: column; }
   .courses__payment-row { grid-template-columns: 1fr; gap: 0; }
+  .courses__promissory-fields { grid-template-columns: 1fr; gap: 0; }
 }

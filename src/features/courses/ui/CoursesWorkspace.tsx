@@ -28,11 +28,18 @@ type RemotePage<T> = { status: "loading" } | { status: "error" } | { status: "su
 type CourseFormValues = Omit<CreateCourseRequest, never>;
 type ClassFormValues = Omit<CreateClassRequest, "startDate" | "endDate"> & { dateRange: [Dayjs, Dayjs] };
 type EditingRecord = { type: "course"; value: Course } | { type: "class"; value: CourseClass };
-type EnrollmentFormValues = Omit<CreateClassEnrollmentRequest, "firstPaymentDate" | "expectedPaymentDate"> & {
+type PromissoryNoteFields = {
+  promissoryDebtorName?: string;
+  promissoryGuarantorName?: string;
+  promissoryIssuePlace?: string;
+  promissorySerialStart?: string;
+};
+type EnrollmentFormValues = Omit<CreateClassEnrollmentRequest, "firstPaymentDate" | "expectedPaymentDate" | "paymentPlan"> & PromissoryNoteFields & {
+  paymentPlan: PaymentPlanType;
   firstPaymentDate?: Dayjs;
   expectedPaymentDate?: Dayjs;
 };
-type EnrollmentEditFormValues = Omit<UpdateClassEnrollmentRequest, "firstPaymentDate" | "expectedPaymentDate"> & { firstPaymentDate?: Dayjs; expectedPaymentDate?: Dayjs };
+type EnrollmentEditFormValues = Omit<UpdateClassEnrollmentRequest, "firstPaymentDate" | "expectedPaymentDate" | "paymentPlan"> & PromissoryNoteFields & { paymentPlan: PaymentPlanType; firstPaymentDate?: Dayjs; expectedPaymentDate?: Dayjs };
 
 const PAGE_SIZE = 8;
 const currency = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
@@ -47,8 +54,9 @@ const moneyInputParser = (value?: string): string => value?.replace(/\./g, "").r
 const courseStatusLabels: Record<CourseStatus, string> = { ACTIVE: "Aktif", DRAFT: "Taslak", ARCHIVED: "Arşivlendi" };
 const classStatusLabels: Record<ClassStatus, string> = { ENROLLMENT_OPEN: "Kayıt açık", PLANNED: "Planlandı", IN_PROGRESS: "Devam ediyor", COMPLETED: "Tamamlandı" };
 const enrollmentLabels: Record<string, string> = { ACTIVE: "Aktif kayıt", COMPLETED: "Tamamladı", CANCELLED: "İptal edildi" };
-const paymentPlanLabels: Record<PaymentPlanType, string> = { CASH: "Peşin", INSTALLMENT: "Taksitli" };
+const paymentPlanLabels: Record<PaymentPlanType, string> = { CASH: "Peşin", INSTALLMENT: "Taksitli", PROMISSORY_NOTE: "Senet" };
 const paymentStatusLabels = { PENDING: "Ödeme bekliyor", COMPLETED: "Ödeme tamamlandı" } as const;
+const paymentPlanOptions: Array<{ value: PaymentPlanType; label: string }> = [{ value: "CASH", label: "Peşin" }, { value: "INSTALLMENT", label: "Taksitli" }, { value: "PROMISSORY_NOTE", label: "Senet" }];
 
 export function CoursesWorkspace({ user }: { user: AuthenticatedUser }): JSX.Element {
   const { message, modal } = App.useApp();
@@ -211,7 +219,7 @@ function PaymentDetailsModal({ classId, student, canReceivePayment, onStudentCha
     finally { setReceivingPaymentId(undefined); }
   };
   return <Modal open={Boolean(student)} title={student ? `${student.fullName} · Ödeme detayları` : "Ödeme detayları"} width={920} onCancel={onClose} footer={<Button onClick={onClose}>Kapat</Button>} destroyOnHidden>
-    {student && <div className="courses__payment-details"><Descriptions bordered size="small" column={{ xs: 1, sm: 2 }} items={[{ key: "fee", label: "Kayıt ücreti", children: currency.format(student.registrationFee) }, { key: "plan", label: "Ödeme türü", children: student.paymentPlan === "INSTALLMENT" ? `${paymentPlanLabels[student.paymentPlan]} · ${student.installmentCount ?? student.payments.length} taksit` : paymentPlanLabels[student.paymentPlan] }, { key: "status", label: "Genel ödeme durumu", children: <PaymentStatusTag status={student.paymentStatus} /> }, { key: "paid", label: "Ödenen", children: currency.format(paidAmount) }, { key: "pending", label: "Bekleyen", children: currency.format(pendingAmount) }, { key: "start", label: student.paymentPlan === "INSTALLMENT" ? "İlk taksit tarihi" : "Tahmini ödeme tarihi", children: formatOptionalApiDate(student.paymentPlan === "INSTALLMENT" ? student.firstPaymentDate : student.expectedPaymentDate) }, { key: "note", label: "Not", span: 2, children: student.note || "-" }]} />
+    {student && <div className="courses__payment-details"><Descriptions bordered size="small" column={{ xs: 1, sm: 2 }} items={[{ key: "fee", label: "Kayıt ücreti", children: currency.format(student.registrationFee) }, { key: "plan", label: "Ödeme türü", children: paymentPlanSummary(student) }, { key: "status", label: "Genel ödeme durumu", children: <PaymentStatusTag status={student.paymentStatus} /> }, { key: "paid", label: "Ödenen", children: currency.format(paidAmount) }, { key: "pending", label: "Bekleyen", children: currency.format(pendingAmount) }, { key: "start", label: student.paymentPlan === "PROMISSORY_NOTE" ? "İlk senet vadesi" : student.paymentPlan === "INSTALLMENT" ? "İlk taksit tarihi" : "Tahmini ödeme tarihi", children: formatOptionalApiDate(student.paymentPlan === "CASH" ? student.expectedPaymentDate : student.firstPaymentDate) }, { key: "note", label: "Not", span: 2, children: student.note || "-" }]} />
       <section aria-labelledby="payment-installments-title"><Typography.Title id="payment-installments-title" level={5}>Ödeme ve taksit planı</Typography.Title><Table rowKey="id" size="small" pagination={false} dataSource={student.payments} scroll={{ x: 760 }} locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Ödeme planı bulunmuyor." /> }} columns={[{ title: "Sıra", render: (_, payment) => `${payment.installmentNumber}/${payment.installmentTotal}` }, { title: "Vade tarihi", dataIndex: "dueDate", render: (value) => formatOptionalApiDate(value) }, { title: "Tutar", dataIndex: "amount", align: "right", render: (value) => currency.format(value) }, { title: "Durum", dataIndex: "status", render: (value: PaymentStatus) => <PaymentStatusTag status={value} /> }, { title: "Ödeme tarihi", dataIndex: "paidAt", render: (value) => formatOptionalApiDate(value) }, { title: "İşlem", width: 136, render: (_, payment) => payment.status === "PENDING" && canReceivePayment ? <Popconfirm title="Ödeme alındı olarak kaydedilsin mi?" description={`${currency.format(payment.amount)} tutarındaki ödeme tamamlanmış sayılacak.`} okText="Ödeme alındı" cancelText="Vazgeç" onConfirm={() => void receive(payment.id, payment.version)}><Button size="small" type="primary" loading={receivingPaymentId === payment.id} disabled={Boolean(receivingPaymentId)}>Ödeme alındı</Button></Popconfirm> : "-" }]} /></section>
     </div>}
   </Modal>;
@@ -259,6 +267,18 @@ function ClassDetailModal({ open, startInEnrollment, loading, error, detail, can
     return () => { active = false; window.clearTimeout(timeout); };
   }, [mode, candidateQuery, candidateFilter, candidateReloadKey]);
 
+  useEffect(() => {
+    if (isScheduledPaymentPlan(paymentPlan) && paymentStatus !== "PENDING") {
+      enrollmentForm.setFieldValue("paymentStatus", "PENDING");
+    }
+  }, [enrollmentForm, paymentPlan, paymentStatus]);
+
+  useEffect(() => {
+    if (isScheduledPaymentPlan(editPaymentPlan) && editPaymentStatus !== "PENDING") {
+      editForm.setFieldValue("paymentStatus", "PENDING");
+    }
+  }, [editForm, editPaymentPlan, editPaymentStatus]);
+
   const openEnrollment = () => {
     enrollmentForm.resetFields();
     enrollmentForm.setFieldsValue({ paymentPlan: "CASH", paymentStatus: "PENDING" });
@@ -276,10 +296,10 @@ function ClassDetailModal({ open, startInEnrollment, loading, error, detail, can
         registrationFee: values.registrationFee,
         paymentPlan: values.paymentPlan,
         paymentStatus: values.paymentStatus,
-        installmentCount: values.paymentPlan === "INSTALLMENT" ? values.installmentCount : null,
-        firstPaymentDate: values.paymentPlan === "INSTALLMENT" ? values.firstPaymentDate?.format("YYYY-MM-DD") ?? null : null,
+        installmentCount: values.paymentPlan === "INSTALLMENT" || values.paymentPlan === "PROMISSORY_NOTE" ? values.installmentCount : null,
+        firstPaymentDate: values.paymentPlan === "INSTALLMENT" || values.paymentPlan === "PROMISSORY_NOTE" ? values.firstPaymentDate?.format("YYYY-MM-DD") ?? null : null,
         expectedPaymentDate: values.paymentPlan === "CASH" && values.paymentStatus === "PENDING" ? values.expectedPaymentDate?.format("YYYY-MM-DD") ?? null : null,
-        note: values.note?.trim() || null,
+        note: mergeEnrollmentNote(values),
       };
       const enrolledStudent = await enrollStudent(detail.classInfo.id, request);
       onDetailChange({ ...detail, classInfo: { ...detail.classInfo, enrolledCount: detail.classInfo.enrolledCount + 1 }, students: [...detail.students, enrolledStudent] });
@@ -305,10 +325,10 @@ function ClassDetailModal({ open, startInEnrollment, loading, error, detail, can
     try {
       const updated = await updateEnrollment(detail.classInfo.id, editingEnrollment.enrollmentId, {
         registrationFee: values.registrationFee, paymentPlan: values.paymentPlan, paymentStatus: values.paymentStatus,
-        installmentCount: values.paymentPlan === "INSTALLMENT" ? values.installmentCount : null,
-        firstPaymentDate: values.paymentPlan === "INSTALLMENT" ? values.firstPaymentDate?.format("YYYY-MM-DD") ?? null : null,
+        installmentCount: values.paymentPlan === "INSTALLMENT" || values.paymentPlan === "PROMISSORY_NOTE" ? values.installmentCount : null,
+        firstPaymentDate: values.paymentPlan === "INSTALLMENT" || values.paymentPlan === "PROMISSORY_NOTE" ? values.firstPaymentDate?.format("YYYY-MM-DD") ?? null : null,
         expectedPaymentDate: values.paymentPlan === "CASH" && values.paymentStatus === "PENDING" ? values.expectedPaymentDate?.format("YYYY-MM-DD") ?? null : null,
-        note: values.note?.trim() || null, version: values.version,
+        note: mergeEnrollmentNote(values), version: values.version,
       });
       onDetailChange({ ...detail, students: detail.students.map((student) => student.id === updated.id ? updated : student) });
       setMode("detail"); setEditingEnrollment(undefined); editForm.resetFields();
@@ -340,7 +360,7 @@ function ClassOverview({ detail, canUpdate, canDelete, onEdit, onDelete }: { det
   return <><Descriptions bordered size="small" column={{ xs: 1, sm: 2 }} items={[{ key: "course", label: "Kurs", children: info.courseName }, { key: "teacher", label: "Eğitmen", children: info.instructorName }, { key: "dates", label: "Tarih", children: `${formatApiDate(info.startDate)} – ${formatApiDate(info.endDate)}` }, { key: "capacity", label: "Doluluk", children: `${info.enrolledCount}/${info.capacity} öğrenci` }, { key: "status", label: "Durum", children: <StatusTag value={info.status} /> }]} />
     {full && <StatusLine tone="warning" title="Sınıf kontenjanı dolu" description="Yeni kayıt için önce kontenjanı artırın veya mevcut kayıtları gözden geçirin." />}
     <div><Typography.Title level={4}>Kayıtlı öğrenciler</Typography.Title><Typography.Text type="secondary">Bu sınıfa kayıtlı {detail.students.length} öğrenci bulunuyor.</Typography.Text></div>
-    <Table rowKey="id" size="small" dataSource={detail.students} pagination={false} scroll={{ x: 1240 }} expandable={{ expandedRowRender: (student) => <PaymentSchedule student={student} />, rowExpandable: (student) => student.payments.length > 0 }} locale={{ emptyText: <Empty description="Bu sınıfa henüz öğrenci kaydedilmedi." /> }} columns={[{ title: "Öğrenci", dataIndex: "fullName" }, { title: "E-posta", dataIndex: "email" }, { title: "Telefon", dataIndex: "phoneMasked", render: (value) => value || "-" }, { title: "Kayıt ücreti", dataIndex: "registrationFee", align: "right", render: (value) => currency.format(value) }, { title: "Ödeme", render: (_, student) => <div className="courses__primary-cell"><span>{paymentStatusLabels[student.paymentStatus]}</span><small>{paymentPlanLabels[student.paymentPlan]}{student.installmentCount ? ` · ${student.installmentCount} taksit` : ""}{student.firstPaymentDate ? ` · ${formatApiDate(student.firstPaymentDate)}` : ""}{student.expectedPaymentDate ? ` · Tahmini: ${formatApiDate(student.expectedPaymentDate)}` : ""}</small></div> }, { title: "Not", dataIndex: "note", width: 220, ellipsis: true, render: (value) => value || "-" }, { title: "Kayıt durumu", dataIndex: "enrollmentStatus", render: (value) => <Tag>{enrollmentLabels[value] ?? value}</Tag> }, { title: "İşlemler", width: 112, fixed: "right", render: (_, student) => <RecordActions canUpdate={canUpdate} canDelete={canDelete} onEdit={() => onEdit(student)} onDelete={() => onDelete(student)} /> }]} /></>;
+    <Table rowKey="id" size="small" dataSource={detail.students} pagination={false} scroll={{ x: 1240 }} expandable={{ expandedRowRender: (student) => <PaymentSchedule student={student} />, rowExpandable: (student) => student.payments.length > 0 }} locale={{ emptyText: <Empty description="Bu sınıfa henüz öğrenci kaydedilmedi." /> }} columns={[{ title: "Öğrenci", dataIndex: "fullName" }, { title: "E-posta", dataIndex: "email" }, { title: "Telefon", dataIndex: "phoneMasked", render: (value) => value || "-" }, { title: "Kayıt ücreti", dataIndex: "registrationFee", align: "right", render: (value) => currency.format(value) }, { title: "Ödeme", render: (_, student) => <div className="courses__primary-cell"><span>{paymentStatusLabels[student.paymentStatus]}</span><small>{paymentPlanSummary(student)}{student.firstPaymentDate ? ` · ${formatApiDate(student.firstPaymentDate)}` : ""}{student.expectedPaymentDate ? ` · Tahmini: ${formatApiDate(student.expectedPaymentDate)}` : ""}</small></div> }, { title: "Not", dataIndex: "note", width: 220, ellipsis: true, render: (value) => value || "-" }, { title: "Kayıt durumu", dataIndex: "enrollmentStatus", render: (value) => <Tag>{enrollmentLabels[value] ?? value}</Tag> }, { title: "İşlemler", width: 112, fixed: "right", render: (_, student) => <RecordActions canUpdate={canUpdate} canDelete={canDelete} onEdit={() => onEdit(student)} onDelete={() => onDelete(student)} /> }]} /></>;
 }
 
 function PaymentSchedule({ student }: { student: EnrolledStudent }): JSX.Element {
@@ -350,9 +370,10 @@ function PaymentSchedule({ student }: { student: EnrolledStudent }): JSX.Element
 function EnrollmentEditForm({ form, paymentPlan, paymentStatus }: { form: ReturnType<typeof Form.useForm<EnrollmentEditFormValues>>[0]; paymentPlan?: PaymentPlanType; paymentStatus?: UpdateClassEnrollmentRequest["paymentStatus"] }): JSX.Element {
   return <Form form={form} layout="vertical" requiredMark="optional">
     <Form.Item name="registrationFee" label="Kayıt ücreti" rules={[{ required: true, message: "Kayıt ücretini yazın." }]}><InputNumber className="courses__money-input" min={0} max={9999999999.99} precision={2} prefix="₺" formatter={moneyInputFormatter} parser={moneyInputParser} /></Form.Item>
-    <Form.Item name="paymentPlan" label="Ödeme şekli" rules={[{ required: true }]}><Segmented block options={[{ value: "CASH", label: "Peşin" }, { value: "INSTALLMENT", label: "Taksitli" }]} /></Form.Item>
-    {paymentPlan === "INSTALLMENT" && <div className="courses__payment-row"><Form.Item name="installmentCount" label="Taksit sayısı" rules={[{ required: true, message: "Taksit sayısını seçin." }]}><Select options={Array.from({ length: 23 }, (_, index) => ({ value: index + 2, label: `${index + 2} taksit` }))} /></Form.Item><Form.Item name="firstPaymentDate" label="İlk ödeme tarihi" rules={[{ required: true, message: "İlk ödeme tarihini seçin." }]}><DatePicker className="courses__date-picker" format="DD MMMM YYYY" /></Form.Item></div>}
-    <Form.Item name="paymentStatus" label="Ödeme durumu" rules={[{ required: true }]}><Select options={Object.entries(paymentStatusLabels).map(([value, label]) => ({ value, label }))} /></Form.Item>
+    <Form.Item name="paymentPlan" label="Ödeme şekli" rules={[{ required: true }]}><Segmented block options={paymentPlanOptions} /></Form.Item>
+    {(paymentPlan === "INSTALLMENT" || paymentPlan === "PROMISSORY_NOTE") && <div className="courses__payment-row"><Form.Item name="installmentCount" label={paymentPlan === "PROMISSORY_NOTE" ? "Senet adedi" : "Taksit sayısı"} rules={[{ required: true, message: paymentPlan === "PROMISSORY_NOTE" ? "Senet adedini seçin." : "Taksit sayısını seçin." }]}><Select options={Array.from({ length: 23 }, (_, index) => ({ value: index + 2, label: paymentPlan === "PROMISSORY_NOTE" ? `${index + 2} senet` : `${index + 2} taksit` }))} /></Form.Item><Form.Item name="firstPaymentDate" label={paymentDateLabel(paymentPlan)} rules={[{ required: true, message: `${paymentDateLabel(paymentPlan)} seçin.` }]}><DatePicker className="courses__date-picker" format="DD MMMM YYYY" /></Form.Item></div>}
+    {paymentPlan === "PROMISSORY_NOTE" && <div className="courses__promissory-fields"><Form.Item name="promissoryDebtorName" label="Senet borçlusu" rules={[{ required: true, message: "Senet borçlusunun adını yazın." }]}><Input maxLength={160} /></Form.Item><Form.Item name="promissoryGuarantorName" label="Kefil"><Input maxLength={160} /></Form.Item><Form.Item name="promissoryIssuePlace" label="Düzenleme yeri" rules={[{ required: true, message: "Senedin düzenleme yerini yazın." }]}><Input maxLength={120} /></Form.Item><Form.Item name="promissorySerialStart" label="Başlangıç senet no"><Input maxLength={80} /></Form.Item></div>}
+    <Form.Item name="paymentStatus" label="Ödeme durumu" rules={[{ required: true }]}><Select options={paymentStatusOptions(paymentPlan)} /></Form.Item>
     {paymentPlan === "CASH" && paymentStatus === "PENDING" && <Form.Item name="expectedPaymentDate" label="Tahmini ödeme tarihi" rules={[{ required: true, message: "Tahmini ödeme tarihini seçin." }]}><DatePicker className="courses__date-picker" format="DD MMMM YYYY" /></Form.Item>}
     <Form.Item name="note" label="Kayıt notu"><Input.TextArea rows={4} maxLength={1000} showCount /></Form.Item>
     <Form.Item name="version" hidden><InputNumber /></Form.Item>
@@ -370,9 +391,10 @@ function EnrollmentForm({ form, candidates, candidateState, selectedCandidate, r
     <section className="courses__payment-form" aria-labelledby="enrollment-payment-title">
       <div><Typography.Title id="enrollment-payment-title" level={5}>Kayıt ve ödeme bilgileri</Typography.Title><Typography.Text type="secondary">Öğrenciye özel ücret ve tahsilat planını tanımlayın.</Typography.Text></div>
       <Form.Item name="registrationFee" label="Kayıt ücreti" rules={[{ required: true, message: "Kayıt ücretini yazın." }]}><InputNumber className="courses__money-input" min={0} max={9999999999.99} precision={2} prefix="₺" formatter={moneyInputFormatter} parser={moneyInputParser} /></Form.Item>
-      <Form.Item name="paymentPlan" label="Ödeme şekli" rules={[{ required: true, message: "Ödeme şeklini seçin." }]}><Segmented block options={[{ value: "CASH", label: "Peşin" }, { value: "INSTALLMENT", label: "Taksitli" }]} /></Form.Item>
-      {paymentPlan === "INSTALLMENT" && <div className="courses__payment-row"><Form.Item name="installmentCount" label="Taksit sayısı" rules={[{ required: true, message: "Taksit sayısını seçin." }]}><Select options={Array.from({ length: 23 }, (_, index) => ({ value: index + 2, label: `${index + 2} taksit` }))} /></Form.Item><Form.Item name="firstPaymentDate" label="İlk ödeme tarihi" rules={[{ required: true, message: "İlk ödeme tarihini seçin." }]}><DatePicker className="courses__date-picker" format="DD MMMM YYYY" /></Form.Item></div>}
-      <Form.Item name="paymentStatus" label="Ödeme durumu" rules={[{ required: true, message: "Ödeme durumunu seçin." }]}><Select options={Object.entries(paymentStatusLabels).map(([value, label]) => ({ value, label }))} /></Form.Item>
+      <Form.Item name="paymentPlan" label="Ödeme şekli" rules={[{ required: true, message: "Ödeme şeklini seçin." }]}><Segmented block options={paymentPlanOptions} /></Form.Item>
+      {(paymentPlan === "INSTALLMENT" || paymentPlan === "PROMISSORY_NOTE") && <div className="courses__payment-row"><Form.Item name="installmentCount" label={paymentPlan === "PROMISSORY_NOTE" ? "Senet adedi" : "Taksit sayısı"} rules={[{ required: true, message: paymentPlan === "PROMISSORY_NOTE" ? "Senet adedini seçin." : "Taksit sayısını seçin." }]}><Select options={Array.from({ length: 23 }, (_, index) => ({ value: index + 2, label: paymentPlan === "PROMISSORY_NOTE" ? `${index + 2} senet` : `${index + 2} taksit` }))} /></Form.Item><Form.Item name="firstPaymentDate" label={paymentDateLabel(paymentPlan)} rules={[{ required: true, message: `${paymentDateLabel(paymentPlan)} seçin.` }]}><DatePicker className="courses__date-picker" format="DD MMMM YYYY" /></Form.Item></div>}
+      {paymentPlan === "PROMISSORY_NOTE" && <div className="courses__promissory-fields"><Form.Item name="promissoryDebtorName" label="Senet borçlusu" rules={[{ required: true, message: "Senet borçlusunun adını yazın." }]}><Input maxLength={160} /></Form.Item><Form.Item name="promissoryGuarantorName" label="Kefil"><Input maxLength={160} /></Form.Item><Form.Item name="promissoryIssuePlace" label="Düzenleme yeri" rules={[{ required: true, message: "Senedin düzenleme yerini yazın." }]}><Input maxLength={120} /></Form.Item><Form.Item name="promissorySerialStart" label="Başlangıç senet no"><Input maxLength={80} /></Form.Item></div>}
+      <Form.Item name="paymentStatus" label="Ödeme durumu" rules={[{ required: true, message: "Ödeme durumunu seçin." }]}><Select options={paymentStatusOptions(paymentPlan)} /></Form.Item>
       {paymentPlan === "CASH" && paymentStatus === "PENDING" && <Form.Item name="expectedPaymentDate" label="Tahmini ödeme tarihi" rules={[{ required: true, message: "Tahmini ödeme tarihini seçin." }]}><DatePicker className="courses__date-picker" format="DD MMMM YYYY" /></Form.Item>}
       <Form.Item name="note" label="Kayıt notu"><Input.TextArea rows={4} maxLength={1000} showCount placeholder="Ödeme anlaşması veya kayıtla ilgili önemli açıklama" /></Form.Item>
     </section>
@@ -388,6 +410,33 @@ function Occupancy({ item }: { item: CourseClass }): JSX.Element { return <div c
 function statusOptions(tab: WorkspaceTab) { const values=tab === "courses" ? courseStatusLabels : classStatusLabels; return [{ value: "all", label: "Tüm durumlar" }, ...Object.entries(values).map(([value,label]) => ({ value,label }))]; }
 function formatApiDate(value: string): string { return dateFormatter.format(new Date(`${value}T00:00:00Z`)); }
 function formatOptionalApiDate(value?: string | null): string { return value ? formatApiDate(value) : "-"; }
+function isScheduledPaymentPlan(paymentPlan?: PaymentPlanType): boolean {
+  return paymentPlan === "INSTALLMENT" || paymentPlan === "PROMISSORY_NOTE";
+}
+function paymentStatusOptions(paymentPlan?: PaymentPlanType): Array<{ value: PaymentStatus; label: string }> {
+  const entries = Object.entries(paymentStatusLabels) as Array<[PaymentStatus, string]>;
+  return entries
+    .filter(([value]) => !isScheduledPaymentPlan(paymentPlan) || value === "PENDING")
+    .map(([value, label]) => ({ value, label }));
+}
+function paymentPlanSummary(student: EnrolledStudent): string {
+  if (student.paymentPlan === "PROMISSORY_NOTE") return `${paymentPlanLabels[student.paymentPlan]} · ${student.installmentCount ?? student.payments.length} senet`;
+  if (student.paymentPlan === "INSTALLMENT") return `${paymentPlanLabels[student.paymentPlan]} · ${student.installmentCount ?? student.payments.length} taksit`;
+  return paymentPlanLabels[student.paymentPlan];
+}
+function mergeEnrollmentNote(values: EnrollmentFormValues | EnrollmentEditFormValues): string | null {
+  const note = values.note?.trim();
+  if (values.paymentPlan !== "PROMISSORY_NOTE") return note || null;
+  const details = [
+    "Senetli kayıt",
+    `Borçlu: ${values.promissoryDebtorName?.trim()}`,
+    values.promissoryGuarantorName?.trim() ? `Kefil: ${values.promissoryGuarantorName.trim()}` : undefined,
+    `Düzenleme yeri: ${values.promissoryIssuePlace?.trim()}`,
+    values.promissorySerialStart?.trim() ? `Senet başlangıç no: ${values.promissorySerialStart.trim()}` : undefined,
+  ].filter(Boolean).join(" | ");
+  return note ? `${details}\n${note}` : details;
+}
+function paymentDateLabel(paymentPlan: PaymentPlanType): string { return paymentPlan === "PROMISSORY_NOTE" ? "İlk senet vadesi" : "İlk ödeme tarihi"; }
 function PaymentStatusTag({ status }: { status: PaymentStatus }): JSX.Element {
   const completed = status === "COMPLETED";
   return <Tag className={`courses__payment-status courses__payment-status--${completed ? "completed" : "pending"}`} icon={completed ? <CheckCircleOutlined /> : <ClockCircleOutlined />}>{paymentStatusLabels[status]}</Tag>;

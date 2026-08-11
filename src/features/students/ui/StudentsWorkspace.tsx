@@ -35,7 +35,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { type Dayjs } from "dayjs";
 import type { AuthenticatedUser } from "../../auth";
-import { createStudent, loadStudents, removeStudent, revealStudentPhone, updateStudent } from "../api/studentApi";
+import { createStudent, loadStudents, removeStudent, revealStudentIdentityNumber, revealStudentPhone, updateStudent } from "../api/studentApi";
 import type { Gender, Student, StudentStatus } from "../model/studentData";
 import "./studentsWorkspace.css";
 
@@ -75,7 +75,7 @@ const formatDate = (value?: string | null) => value
 const optionalText = (value?: string | null) => value || "-";
 const nullableText = (value?: string) => value?.trim() || null;
 
-export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["student:delete", "student:phone:reveal"] } }: { user?: AuthenticatedUser }): JSX.Element {
+export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] } }: { user?: AuthenticatedUser }): JSX.Element {
   const { message, modal } = App.useApp();
   const screens = Grid.useBreakpoint();
   const [form] = Form.useForm<FormValues>();
@@ -92,6 +92,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["s
   const formStatus = Form.useWatch("status", form);
   const canDelete = user.authorities.includes("student:delete");
   const canReveal = user.authorities.includes("student:phone:reveal");
+  const canRevealIdentityNumber = user.authorities.includes("student:identity-number:reveal");
 
   useEffect(() => {
     let active = true;
@@ -310,7 +311,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["s
   </Flex>
     <div className="students__toolbar"><Input aria-label="Öğrenci ara" prefix={<SearchOutlined />} placeholder="Ad, e-posta, okul veya meslek ara" value={query} onChange={(e) => setQuery(e.target.value)} allowClear /><Select aria-label="Öğrenci durumuna göre filtrele" value={status} onChange={setStatus} options={[{ value: "all", label: "Tüm durumlar" }, ...Object.entries(statusLabels).map(([value, label]) => ({ value, label }))]} /></div>
     {!loading && filtered.length === 0 ? <Empty description="Öğrenci kaydı bulunamadı." /> : screens.md ? <Table loading={loading} rowKey="id" columns={columns} dataSource={filtered} pagination={{ pageSize: 8, showSizeChanger: false }} onRow={(s) => ({ className: "students__clickable-row", onClick: () => setSelected(s) })} /> : <div className="students__mobile-list">{filtered.map((s) => <article className="students__mobile-card" key={s.id}><Flex justify="space-between"><strong>{s.fullName}</strong><StatusTag status={s.status} /></Flex><span><PhoneOutlined /> {s.phoneMasked}</span><span><IdcardOutlined /> {s.identityNumberMasked}</span><Flex justify="end">{actions(s)}</Flex></article>)}</div>}
-    <DetailModal key={selected?.id ?? "closed"} student={selected} canReveal={canReveal} onClose={() => setSelected(undefined)} />
+    <DetailModal key={selected?.id ?? "closed"} student={selected} canReveal={canReveal} canRevealIdentityNumber={canRevealIdentityNumber} onClose={() => setSelected(undefined)} />
   </section>;
 }
 
@@ -318,21 +319,28 @@ function FormSection({ title, children }: { title: string; children: ReactNode }
   return <div className="students__form-section"><Typography.Title level={3}>{title}</Typography.Title>{children}</div>;
 }
 
-function DetailModal({ student, canReveal, onClose }: { student?: Student; canReveal: boolean; onClose: () => void }) {
+function DetailModal({ student, canReveal, canRevealIdentityNumber, onClose }: { student?: Student; canReveal: boolean; canRevealIdentityNumber: boolean; onClose: () => void }) {
   const { message } = App.useApp();
   const [phone, setPhone] = useState<string>();
+  const [identityNumber, setIdentityNumber] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [identityLoading, setIdentityLoading] = useState(false);
   const reveal = async () => {
     if (!student) return;
     setLoading(true);
     try { setPhone(await revealStudentPhone(student.id)); } catch { message.error("Telefon görüntülenemedi."); } finally { setLoading(false); }
+  };
+  const revealIdentity = async () => {
+    if (!student) return;
+    setIdentityLoading(true);
+    try { setIdentityNumber(await revealStudentIdentityNumber(student.id)); } catch { message.error("TC kimlik no görüntülenemedi."); } finally { setIdentityLoading(false); }
   };
   return <Modal centered width={860} open={!!student} title={student?.fullName ?? "Öğrenci bilgileri"} footer={<Button onClick={onClose}>Kapat</Button>} onCancel={onClose}>{student && <div className="students__detail"><Descriptions bordered size="small" column={{ xs: 1, sm: 2 }} items={[
     { key: "status", label: "Durum", children: <StatusTag status={student.status} /> },
     { key: "date", label: "Kayıt tarihi", children: formatDate(student.registrationDate) },
     { key: "email", label: "E-posta", children: <a href={`mailto:${student.email}`}><MailOutlined /> {student.email}</a> },
     { key: "phone", label: "Telefon", children: phone ? <a href={`tel:${phone}`}><PhoneOutlined /> {phone}</a> : <Space>{student.phoneMasked}{canReveal && student.phoneAvailable && <Tooltip title="Telefon numarasını göster"><Button aria-label="Telefon numarasını göster" size="small" icon={<EyeOutlined />} loading={loading} onClick={() => void reveal()} /></Tooltip>}</Space> },
-    { key: "identity", label: "TC kimlik no", children: student.identityNumberAvailable ? student.identityNumberMasked : "-" },
+    { key: "identity", label: "TC kimlik no", children: identityNumber ? identityNumber : <Space>{student.identityNumberAvailable ? student.identityNumberMasked : "-"}{canRevealIdentityNumber && student.identityNumberAvailable && <Tooltip title="TC kimlik numarasını göster"><Button aria-label="TC kimlik numarasını göster" size="small" icon={<EyeOutlined />} loading={identityLoading} onClick={() => void revealIdentity()} /></Tooltip>}</Space> },
     { key: "gender", label: "Cinsiyet", children: genderLabels[student.gender] },
     { key: "birth", label: "Doğum", children: `${optionalText(student.birthPlace)} / ${formatDate(student.birthDate)}` },
     { key: "parents", label: "Anne / Baba", children: `${optionalText(student.motherName)} / ${optionalText(student.fatherName)}` },

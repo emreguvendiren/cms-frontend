@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppProviders } from "../../../app/providers/AppProviders";
 import { StudentsWorkspace } from "./StudentsWorkspace";
 
-const api = vi.hoisted(() => ({ loadStudents: vi.fn(), createStudent: vi.fn(), updateStudent: vi.fn(), removeStudent: vi.fn(), revealStudentPhone: vi.fn() }));
+const api = vi.hoisted(() => ({ loadStudents: vi.fn(), createStudent: vi.fn(), updateStudent: vi.fn(), removeStudent: vi.fn(), revealStudentPhone: vi.fn(), revealStudentIdentityNumber: vi.fn() }));
 vi.mock("../api/studentApi", () => api);
-const admin = { id: "admin", email: "admin@admin.com", authorities: ["student:delete", "student:phone:reveal"] };
+const admin = { id: "admin", email: "admin@admin.com", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] };
 const student = {
   id: "83f97d7d-9951-4759-a2e6-71155cb0a901",
   fullName: "Deniz Arslan",
@@ -36,6 +36,7 @@ const student = {
 beforeEach(() => {
   api.loadStudents.mockResolvedValue({ content: [student], page: 0, size: 100, totalElements: 1, totalPages: 1, first: true, last: true });
   api.revealStudentPhone.mockResolvedValue("+905551234567");
+  api.revealStudentIdentityNumber.mockResolvedValue("10000000146");
 });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 const show = () => render(<AppProviders><StudentsWorkspace user={admin} /></AppProviders>);
@@ -57,6 +58,16 @@ describe("StudentsWorkspace", () => {
     await user.click(within(dialog).getByRole("button", { name: "Telefon numarasını göster" }));
     expect(await within(dialog).findByText("+905551234567")).toBeInTheDocument();
     expect(api.revealStudentPhone).toHaveBeenCalledWith(student.id);
+  });
+
+  it("TC kimlik noyu yetkili kullanıcıya tek tıkla gösterir", async () => {
+    const user = userEvent.setup();
+    show();
+    await user.click(await screen.findByRole("button", { name: "Görüntüle" }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "TC kimlik numarasını göster" }));
+    expect(await within(dialog).findByText("10000000146")).toBeInTheDocument();
+    expect(api.revealStudentIdentityNumber).toHaveBeenCalledWith(student.id);
   });
 
   it("silme yetkisi olmayan kullanıcıya silme aksiyonu göstermez", async () => {

@@ -8,6 +8,8 @@ import { loadAuthorizationCatalog, loadManagedUsers, saveUserAuthorities, type A
 import "./authorizationWorkspace.css";
 
 const labels: Record<string, string> = {
+  "student:read": "Öğrencileri görüntüleme", "student:create": "Öğrenci oluşturma", "student:update": "Öğrenci düzenleme",
+  "student:delete": "Öğrenci silme", "student:phone:reveal": "Telefon numarası görüntüleme", "student:identity-number:reveal": "TC kimlik numarası görüntüleme",
   "profile:read": "Profil görüntüleme", "course:read": "Kursları görüntüleme", "course:create": "Kurs oluşturma",
   "course:update": "Kurs düzenleme", "course:delete": "Kurs silme",
   "class:read": "Sınıfları görüntüleme", "class:create": "Sınıf oluşturma", "class:update": "Sınıf düzenleme", "class:delete": "Sınıf silme", "class:enrollment:create": "Sınıfa öğrenci kaydetme", "class:enrollment:update": "Sınıf kaydını düzenleme", "class:enrollment:delete": "Sınıf kaydını silme", "user:permission:manage": "Rol ve yetki yönetimi",
