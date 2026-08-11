@@ -130,6 +130,7 @@ export type {
   UpdateClassEnrollmentRequest,
   ReceiveEnrollmentPaymentRequest,
   EnrolledStudent,
+  PaymentMethod,
   PaymentPlanType,
   PaymentStatus,
   Student,

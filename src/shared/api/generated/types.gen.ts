@@ -110,14 +110,19 @@ export type EnrollmentPayment = {
     dueDate?: string | null;
     status: PaymentStatus;
     paidAt?: string | null;
+    paymentMethod?: PaymentMethod | null;
     version: number;
 };
 
 export type ReceiveEnrollmentPaymentRequest = {
     version: number;
+    paidAt: string;
+    paymentMethod: PaymentMethod;
 };
 
 export type PaymentPlanType = 'CASH' | 'INSTALLMENT' | 'PROMISSORY_NOTE';
+
+export type PaymentMethod = 'CASH' | 'CREDIT_CARD' | 'BANK_TRANSFER';
 
 export type PaymentStatus = 'PENDING' | 'COMPLETED';
 
