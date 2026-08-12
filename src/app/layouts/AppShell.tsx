@@ -5,6 +5,7 @@ import BankOutlined from "@ant-design/icons/BankOutlined";
 import BellOutlined from "@ant-design/icons/BellOutlined";
 import BookOutlined from "@ant-design/icons/BookOutlined";
 import CalendarOutlined from "@ant-design/icons/CalendarOutlined";
+import CreditCardOutlined from "@ant-design/icons/CreditCardOutlined";
 import DownOutlined from "@ant-design/icons/DownOutlined";
 import MenuFoldOutlined from "@ant-design/icons/MenuFoldOutlined";
 import MenuOutlined from "@ant-design/icons/MenuOutlined";
@@ -23,6 +24,7 @@ const navigationItems = [
   { key: "students", icon: <TeamOutlined />, label: "Öğrenciler" },
   { key: "courses", icon: <BookOutlined />, label: "Kurslar ve sınıflar" },
   { key: "calendar", icon: <CalendarOutlined />, label: "Ders takvimi" },
+  { key: "paymentCalendar", icon: <CreditCardOutlined />, label: "Odeme Takvimi", requiredAuthority: "class:enrollment:update" },
   { key: "finance", icon: <BankOutlined />, label: "Finans" },
   { key: "reports", icon: <PieChartOutlined />, label: "Raporlar" },
   { key: "authorization", icon: <SafetyCertificateOutlined />, label: "Rol ve yetkiler", requiredAuthority: "user:permission:manage" },

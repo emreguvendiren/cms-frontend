@@ -127,6 +127,30 @@ export type EnrollmentPayment = {
     version: number;
 };
 
+export type PaymentCalendar = {
+    month: string;
+    items: Array<PaymentCalendarItem>;
+};
+
+export type PaymentCalendarItem = {
+    paymentId: string;
+    enrollmentId: string;
+    classId: string;
+    classCode: string;
+    className: string;
+    courseName: string;
+    studentId: string;
+    studentFullName: string;
+    paymentPlan: PaymentPlanType;
+    installmentNumber: number;
+    installmentTotal: number;
+    amount: number;
+    dueDate?: string | null;
+    status: PaymentStatus;
+    paidAt?: string | null;
+    paymentMethod?: PaymentMethod | null;
+};
+
 export type ReceiveEnrollmentPaymentRequest = {
     version: number;
     paidAt: string;
@@ -980,6 +1004,41 @@ export type ReceiveEnrollmentPaymentResponses = {
 };
 
 export type ReceiveEnrollmentPaymentResponse = ReceiveEnrollmentPaymentResponses[keyof ReceiveEnrollmentPaymentResponses];
+
+export type GetPaymentCalendarData = {
+    body?: never;
+    path?: never;
+    query: {
+        month: string;
+    };
+    url: '/api/payment-calendar';
+};
+
+export type GetPaymentCalendarErrors = {
+    /**
+     * Invalid request
+     */
+    400: ApiError;
+    /**
+     * Authentication failed
+     */
+    401: ApiError;
+    /**
+     * Authenticated user lacks the required authority
+     */
+    403: ApiError;
+};
+
+export type GetPaymentCalendarError = GetPaymentCalendarErrors[keyof GetPaymentCalendarErrors];
+
+export type GetPaymentCalendarResponses = {
+    /**
+     * Monthly collected and expected enrollment payments
+     */
+    200: PaymentCalendar;
+};
+
+export type GetPaymentCalendarResponse = GetPaymentCalendarResponses[keyof GetPaymentCalendarResponses];
 
 export type ListStudentsData = {
     body?: never;

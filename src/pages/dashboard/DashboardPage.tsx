@@ -6,6 +6,7 @@ import type { AuthenticatedUser } from "../../features/auth";
 import { DashboardOverview } from "../../features/dashboard";
 import { CoursesWorkspace } from "../../features/courses";
 import { CalendarWorkspace } from "../../features/calendar";
+import { PaymentCalendarWorkspace } from "../../features/payment-calendar";
 import { AuthorizationWorkspace } from "../../features/authorization";
 import { StudentsWorkspace } from "../../features/students";
 
@@ -14,7 +15,7 @@ type DashboardPageProps = {
   onLogout: () => void;
 };
 
-const dashboardPageKeys = ["dashboard", "students", "courses", "calendar", "finance", "reports", "authorization"] as const;
+const dashboardPageKeys = ["dashboard", "students", "courses", "calendar", "paymentCalendar", "finance", "reports", "authorization"] as const;
 type DashboardPageKey = (typeof dashboardPageKeys)[number];
 const pageQueryKey = "page";
 
@@ -24,6 +25,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps): JSX.Eleme
     "students",
     "courses",
     "calendar",
+    ...(user.authorities.includes("class:enrollment:update") ? ["paymentCalendar" as const] : []),
     "finance",
     "reports",
     ...(user.authorities.includes("user:permission:manage") ? ["authorization" as const] : []),
@@ -52,7 +54,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps): JSX.Eleme
 
   return (
     <AppShell user={user} onLogout={onLogout} activePage={activePage} onNavigate={navigate}>
-      {activePage === "students" ? <StudentsWorkspace user={user} /> : activePage === "courses" ? <CoursesWorkspace user={user} /> : activePage === "calendar" ? <CalendarWorkspace /> : activePage === "authorization" ? <AuthorizationWorkspace currentUser={user} /> : <DashboardOverview />}
+      {activePage === "students" ? <StudentsWorkspace user={user} /> : activePage === "courses" ? <CoursesWorkspace user={user} /> : activePage === "calendar" ? <CalendarWorkspace /> : activePage === "paymentCalendar" ? <PaymentCalendarWorkspace /> : activePage === "authorization" ? <AuthorizationWorkspace currentUser={user} /> : <DashboardOverview />}
     </AppShell>
   );
 }

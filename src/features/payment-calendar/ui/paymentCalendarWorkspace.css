@@ -1,0 +1,64 @@
+.payment-calendar { width: min(100%, 1600px); margin: 0 auto; }
+.payment-calendar__heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.payment-calendar__eyebrow { color: var(--app-brand) !important; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+.payment-calendar__heading h1.ant-typography { margin: 8px 0; font-size: clamp(28px, 3vw, 40px); line-height: 1.2; }
+.payment-calendar__heading p.ant-typography { margin: 0; color: var(--app-neutral-500); font-size: 15px; }
+.payment-calendar__summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+.payment-calendar__metric { border-color: var(--app-neutral-200); }
+.payment-calendar__metric .ant-card-body { display: grid; gap: 8px; padding: 16px; }
+.payment-calendar__metric-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 8px; color: var(--app-brand); background: var(--app-brand-soft); font-size: 20px; }
+.payment-calendar__layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 24px; }
+.payment-calendar__layout--full { grid-template-columns: minmax(0, 1fr); }
+.payment-calendar__surface, .payment-calendar__day { border: 1px solid var(--app-neutral-200); border-radius: 12px; background: var(--app-surface); }
+.payment-calendar__surface { min-width: 0; overflow: hidden; }
+.payment-calendar__surface .ant-picker-calendar-header { padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }
+.payment-calendar__surface .ant-picker-content th { padding: 12px 8px; color: var(--app-neutral-600); font-size: 12px; font-weight: 600; }
+.payment-calendar__surface .ant-picker-calendar-date { min-height: 112px; margin: 0 !important; padding: 8px !important; border-block-start-color: var(--app-neutral-200) !important; border-inline-end: 1px solid var(--app-neutral-200); }
+.payment-calendar__surface .ant-picker-cell-selected .ant-picker-calendar-date { background: var(--app-brand-soft) !important; }
+.payment-calendar__surface .ant-picker-calendar-date-value { color: var(--app-neutral-700); font-weight: 600; }
+.payment-calendar__events { display: grid; gap: 4px; margin-top: 6px; }
+.payment-calendar__event { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 3px 6px; border-radius: 4px; color: var(--app-neutral-700); background: var(--app-neutral-100); font-size: 11px; line-height: 1.35; }
+.payment-calendar__event > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.payment-calendar__event-marker { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--app-neutral-500); }
+.payment-calendar__event--completed { color: var(--app-success); background: var(--app-success-soft); }
+.payment-calendar__event--completed .payment-calendar__event-marker { background: var(--app-success); }
+.payment-calendar__event--installment { color: var(--app-chart-blue); background: var(--app-info-soft); }
+.payment-calendar__event--installment .payment-calendar__event-marker { background: var(--app-chart-blue); }
+.payment-calendar__event--promissory { color: var(--app-warning); background: var(--app-warning-soft); }
+.payment-calendar__event--promissory .payment-calendar__event-marker { background: var(--app-warning); }
+.payment-calendar__more { padding-left: 6px; color: var(--app-neutral-500); font-size: 11px; }
+.payment-calendar__day { position: sticky; top: 96px; overflow: hidden; }
+.payment-calendar__day-heading { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }
+.payment-calendar__day-heading > .anticon { color: var(--app-brand); font-size: 20px; }
+.payment-calendar__day-heading h4.ant-typography { margin: 2px 0 0; }
+.payment-calendar__day-list { display: grid; max-height: calc(100svh - 224px); overflow-y: auto; }
+.payment-calendar__payment { display: grid; gap: 12px; padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }
+.payment-calendar__payment:last-child { border-bottom: 0; }
+.payment-calendar__payment strong { display: block; margin-top: 2px; color: var(--app-neutral-900); }
+.payment-calendar__amount { color: var(--app-neutral-900); font-size: 20px; font-weight: 700; }
+.payment-calendar__status { flex: none; margin: 0; }
+.payment-calendar__status--completed { color: var(--app-success); background: var(--app-success-soft); border-color: var(--app-success-border); }
+.payment-calendar__status--installment { color: var(--app-chart-blue); background: var(--app-info-soft); border-color: var(--app-info-border); }
+.payment-calendar__status--promissory { color: var(--app-warning); background: var(--app-warning-soft); border-color: var(--app-warning-border); }
+.payment-calendar__meta { display: grid; gap: 6px; color: var(--app-neutral-600); font-size: 12px; }
+.payment-calendar__meta span { display: flex; align-items: center; gap: 6px; }
+.payment-calendar__empty { padding: 32px 16px; border-top: 1px solid var(--app-neutral-200); }
+.payment-calendar__loading { padding: 24px; border: 1px solid var(--app-neutral-200); border-radius: 12px; background: var(--app-surface); }
+
+@media (max-width: 1199px) {
+  .payment-calendar__layout { grid-template-columns: 1fr; }
+  .payment-calendar__day { position: static; }
+  .payment-calendar__day-list { max-height: none; }
+}
+
+@media (max-width: 767px) {
+  .payment-calendar__heading { align-items: stretch; flex-direction: column; gap: 16px; }
+  .payment-calendar__summary { grid-template-columns: 1fr; }
+  .payment-calendar__surface { overflow: visible; }
+  .payment-calendar__surface .ant-picker-calendar-header { padding: 12px; }
+  .payment-calendar__surface .ant-picker-panel { border-top: 1px solid var(--app-neutral-200); }
+  .payment-calendar__events { display: none; }
+  .payment-calendar__surface .ant-picker-cell-in-view:has(.payment-calendar__events) .ant-picker-cell-inner::after { content: ""; position: absolute; right: 4px; bottom: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--app-brand); }
+  .payment-calendar__day-heading { grid-template-columns: auto 1fr; }
+  .payment-calendar__day-heading .ant-tag { grid-column: 2; justify-self: start; }
+}
