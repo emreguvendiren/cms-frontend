@@ -79,6 +79,7 @@ function renderPaymentCalendar() {
 
 describe("PaymentCalendarWorkspace", () => {
   it("shows monthly summary cards and selected day payments", async () => {
+    const user = userEvent.setup();
     renderPaymentCalendar();
 
     expect(await screen.findByRole("heading", { name: "Odeme Takvimi" })).toBeVisible();
@@ -93,6 +94,9 @@ describe("PaymentCalendarWorkspace", () => {
     expect(within(selectedDay).getByText("Tahsil edildi")).toBeVisible();
     expect(within(selectedDay).getByText("Taksit vadesi")).toBeVisible();
     expect(within(selectedDay).getByText("Senet vadesi")).toBeVisible();
+
+    await user.click(within(selectedDay).getByRole("button", { name: "Secili gun panelini kapat" }));
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
 
   it("offers retry when loading fails", async () => {

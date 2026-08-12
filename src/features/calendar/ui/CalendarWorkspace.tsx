@@ -3,9 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import CalendarOutlined from "@ant-design/icons/CalendarOutlined";
 import CheckCircleOutlined from "@ant-design/icons/CheckCircleOutlined";
 import ClockCircleOutlined from "@ant-design/icons/ClockCircleOutlined";
+import CloseOutlined from "@ant-design/icons/CloseOutlined";
 import TeamOutlined from "@ant-design/icons/TeamOutlined";
 import UserOutlined from "@ant-design/icons/UserOutlined";
-import { Button, Calendar, Empty, Flex, Grid, Progress, Select, Skeleton, Tag, Typography } from "antd";
+import { Button, Calendar, Empty, Flex, Grid, Progress, Select, Skeleton, Tag, Tooltip, Typography } from "antd";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/tr";
@@ -41,6 +42,7 @@ export function CalendarWorkspace(): JSX.Element {
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
   const [panelMode, setPanelMode] = useState<"month" | "year">("month");
   const [status, setStatus] = useState<CalendarStatus>("ALL");
+  const [closedSelectionKey, setClosedSelectionKey] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -60,7 +62,8 @@ export function CalendarWorkspace(): JSX.Element {
     () => visibleClasses.filter((item) => selectedScope === "date" ? includesDate(item, selectedDate) : overlapsMonth(item, selectedDate)),
     [selectedDate, selectedScope, visibleClasses],
   );
-  const hasSelectedClasses = selectedClasses.length > 0;
+  const selectedKey = `${selectedScope}:${selectedScope === "date" ? selectedDate.format("YYYY-MM-DD") : selectedDate.format("YYYY-MM")}`;
+  const hasSelectedClasses = selectedClasses.length > 0 && closedSelectionKey !== selectedKey;
 
   return (
     <section className="class-calendar" aria-labelledby="class-calendar-title">
@@ -93,7 +96,7 @@ export function CalendarWorkspace(): JSX.Element {
             />
             {visibleClasses.length === 0 && <div className="class-calendar__empty"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={classes.length === 0 ? "Takvimde gösterilecek sınıf bulunmuyor." : "Bu filtreye uygun sınıf bulunmuyor."} /></div>}
           </div>
-          {hasSelectedClasses && <SelectedClasses date={selectedDate} scope={selectedScope} classes={selectedClasses} />}
+          {hasSelectedClasses && <SelectedClasses date={selectedDate} scope={selectedScope} classes={selectedClasses} onClose={() => setClosedSelectionKey(selectedKey)} />}
         </div>
       )}
     </section>
@@ -117,7 +120,7 @@ function CalendarCell({ date, classes }: { date: Dayjs; classes: CourseClass[] }
   );
 }
 
-function SelectedClasses({ date, scope, classes }: { date: Dayjs; scope: SelectedScope; classes: CourseClass[] }): JSX.Element {
+function SelectedClasses({ date, scope, classes, onClose }: { date: Dayjs; scope: SelectedScope; classes: CourseClass[]; onClose: () => void }): JSX.Element {
   return (
     <aside className="class-calendar__day" aria-labelledby="selected-day-title" aria-label={scope === "date" ? "Seçili gün sınıfları" : "Seçili ay sınıfları"}>
       <div className="class-calendar__day-heading">
@@ -127,6 +130,9 @@ function SelectedClasses({ date, scope, classes }: { date: Dayjs; scope: Selecte
           <Typography.Title id="selected-day-title" level={4}>{scope === "date" ? date.format("D MMMM YYYY") : date.format("MMMM YYYY")}</Typography.Title>
         </div>
         <Tag>{classes.length} sınıf</Tag>
+        <Tooltip title="Paneli kapat">
+          <Button className="class-calendar__day-close" type="text" aria-label="Secili gun panelini kapat" icon={<CloseOutlined />} onClick={onClose} />
+        </Tooltip>
       </div>
       <div className="class-calendar__day-list">
         {classes.map((item) => <ClassSummary key={item.id} item={item} />)}

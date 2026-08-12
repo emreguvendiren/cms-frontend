@@ -37,6 +37,7 @@ function renderCalendar() {
 
 describe("CalendarWorkspace", () => {
   it("sınıfları ay takviminde ve seçili gün özetinde gösterir", async () => {
+    const user = userEvent.setup();
     renderCalendar();
     expect(await screen.findByRole("heading", { name: "Ders takvimi" })).toBeVisible();
     const selectedDay = await screen.findByRole("complementary");
@@ -45,6 +46,9 @@ describe("CalendarWorkspace", () => {
     expect(within(selectedDay).getByText("09:00 - 18:00")).toBeVisible();
     expect(within(selectedDay).getByText("8/14")).toBeVisible();
     expect(screen.getAllByText(currentClass.name).length).toBeGreaterThan(1);
+
+    await user.click(within(selectedDay).getByRole("button", { name: "Secili gun panelini kapat" }));
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
 
   it("durum filtresine uymayan sınıfları takvimden kaldırır ve sağ paneli kapatır", async () => {

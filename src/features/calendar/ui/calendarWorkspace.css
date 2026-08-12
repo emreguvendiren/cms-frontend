@@ -23,11 +23,14 @@
 .class-calendar__event--planned .class-calendar__event-marker { background: var(--app-warning); }
 .class-calendar__event--in_progress { color: var(--app-chart-blue); background: var(--app-info-soft); }
 .class-calendar__event--in_progress .class-calendar__event-marker { background: var(--app-chart-blue); }
+.class-calendar__event--completed { color: var(--app-success); background: var(--app-success-soft); }
+.class-calendar__event--completed .class-calendar__event-marker { background: var(--app-success); }
 .class-calendar__more { padding-left: 6px; color: var(--app-neutral-500); font-size: 11px; }
 .class-calendar__day { position: sticky; top: 96px; overflow: hidden; }
-.class-calendar__day-heading { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }
+.class-calendar__day-heading { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }
 .class-calendar__day-heading > .anticon { color: var(--app-brand); font-size: 20px; }
 .class-calendar__day-heading h4.ant-typography { margin: 2px 0 0; }
+.class-calendar__day-close { width: 32px; height: 32px; color: var(--app-neutral-600); }
 .class-calendar__day-list { display: grid; max-height: calc(100svh - 224px); overflow-y: auto; }
 .class-calendar__class { display: grid; gap: 16px; padding: 16px; border-bottom: 1px solid var(--app-neutral-200); }
 .class-calendar__class:last-child { border-bottom: 0; }
@@ -36,7 +39,7 @@
 .class-calendar__status--enrollment_open { color: var(--app-brand); background: var(--app-brand-soft); border-color: var(--app-brand); }
 .class-calendar__status--planned { color: var(--app-warning); background: var(--app-warning-soft); border-color: var(--app-warning-border); }
 .class-calendar__status--in_progress { color: var(--app-chart-blue); background: var(--app-info-soft); border-color: var(--app-info-border); }
-.class-calendar__status--completed { color: var(--app-neutral-600); background: var(--app-neutral-100); border-color: var(--app-neutral-300); }
+.class-calendar__status--completed { color: var(--app-success); background: var(--app-success-soft); border-color: var(--app-success-border); }
 .class-calendar__meta { display: grid; gap: 6px; color: var(--app-neutral-600); font-size: 12px; }
 .class-calendar__meta span { display: flex; align-items: center; gap: 6px; }
 .class-calendar__occupancy { color: var(--app-neutral-600); font-size: 12px; }
@@ -60,6 +63,7 @@
   .class-calendar__surface .ant-picker-panel { border-top: 1px solid var(--app-neutral-200); }
   .class-calendar__events { display: none; }
   .class-calendar__surface .ant-picker-cell-in-view:has(.class-calendar__events) .ant-picker-cell-inner::after { content: ""; position: absolute; right: 4px; bottom: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--app-brand); }
-  .class-calendar__day-heading { grid-template-columns: auto 1fr; }
+  .class-calendar__day-heading { grid-template-columns: auto 1fr auto; }
   .class-calendar__day-heading .ant-tag { grid-column: 2; justify-self: start; }
+  .class-calendar__day-close { grid-column: 3; grid-row: 1; }
 }

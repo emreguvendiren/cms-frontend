@@ -4,9 +4,10 @@ import BankOutlined from "@ant-design/icons/BankOutlined";
 import CalendarOutlined from "@ant-design/icons/CalendarOutlined";
 import CheckCircleOutlined from "@ant-design/icons/CheckCircleOutlined";
 import ClockCircleOutlined from "@ant-design/icons/ClockCircleOutlined";
+import CloseOutlined from "@ant-design/icons/CloseOutlined";
 import FileTextOutlined from "@ant-design/icons/FileTextOutlined";
-import UserOutlined from "@ant-design/icons/UserOutlined";
-import { Button, Calendar, Card, Empty, Flex, Grid, Skeleton, Statistic, Tag, Typography } from "antd";
+import OrderedListOutlined from "@ant-design/icons/OrderedListOutlined";
+import { Button, Calendar, Card, Empty, Flex, Grid, Skeleton, Statistic, Tag, Tooltip, Typography } from "antd";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/tr";
@@ -22,6 +23,7 @@ type PaymentCalendarState =
 
 type SelectedScope = "date" | "month";
 type PaymentKind = "completed" | "installment" | "promissory";
+type CompletedPaymentMethod = NonNullable<PaymentCalendarItem["paymentMethod"]>;
 
 const emptyItems: PaymentCalendarItem[] = [];
 const currency = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
@@ -35,6 +37,7 @@ export function PaymentCalendarWorkspace(): JSX.Element {
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
   const [panelMode, setPanelMode] = useState<"month" | "year">("month");
+  const [closedSelectionKey, setClosedSelectionKey] = useState<string | null>(null);
   const monthKey = selectedDate.format("YYYY-MM");
 
   useEffect(() => {
@@ -51,6 +54,8 @@ export function PaymentCalendarWorkspace(): JSX.Element {
     () => items.filter((item) => selectedScope === "date" ? eventDate(item).isSame(selectedDate, "day") : eventDate(item).isSame(selectedDate, "month")),
     [items, selectedDate, selectedScope],
   );
+  const selectedKey = `${selectedScope}:${selectedScope === "date" ? selectedDate.format("YYYY-MM-DD") : selectedDate.format("YYYY-MM")}`;
+  const showSelectedPayments = selectedItems.length > 0 && closedSelectionKey !== selectedKey;
   const summary = useMemo(() => buildSummary(items), [items]);
 
   return (
@@ -68,7 +73,7 @@ export function PaymentCalendarWorkspace(): JSX.Element {
       {state.status === "success" && (
         <>
           <SummaryCards summary={summary} />
-          <div className={`payment-calendar__layout${selectedItems.length > 0 ? "" : " payment-calendar__layout--full"}`}>
+          <div className={`payment-calendar__layout${showSelectedPayments ? "" : " payment-calendar__layout--full"}`}>
             <div className="payment-calendar__surface">
               <Calendar
                 value={selectedDate}
@@ -79,7 +84,7 @@ export function PaymentCalendarWorkspace(): JSX.Element {
               />
               {items.length === 0 && <div className="payment-calendar__empty"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Bu ay icin odeme hareketi bulunmuyor." /></div>}
             </div>
-            {selectedItems.length > 0 && <SelectedPayments date={selectedDate} scope={selectedScope} items={selectedItems} />}
+            {showSelectedPayments && <SelectedPayments date={selectedDate} scope={selectedScope} items={selectedItems} onClose={() => setClosedSelectionKey(selectedKey)} />}
           </div>
         </>
       )}
@@ -89,23 +94,47 @@ export function PaymentCalendarWorkspace(): JSX.Element {
 
 function SummaryCards({ summary }: { summary: PaymentSummary }): JSX.Element {
   return (
-    <div className="payment-calendar__summary" aria-label="Aylik odeme ozeti">
-      <MetricCard title="Tamamlanan odemeler" value={summary.completed.count} amount={summary.completed.amount} icon={<CheckCircleOutlined />} />
-      <MetricCard title="Beklenen taksitler" value={summary.installment.count} amount={summary.installment.amount} icon={<ClockCircleOutlined />} />
-      <MetricCard title="Beklenen senetler" value={summary.promissory.count} amount={summary.promissory.amount} icon={<FileTextOutlined />} />
+      <div className="payment-calendar__summary" aria-label="Aylik odeme ozeti">
+      <MetricCard title="Tamamlanan odemeler" kind="completed" value={summary.completed.count} amount={summary.completed.amount} icon={<CheckCircleOutlined />} breakdown={summary.completed.byMethod} />
+      <MetricCard title="Beklenen taksitler" kind="installment" value={summary.installment.count} amount={summary.installment.amount} icon={<ClockCircleOutlined />} />
+      <MetricCard title="Beklenen senetler" kind="promissory" value={summary.promissory.count} amount={summary.promissory.amount} icon={<FileTextOutlined />} />
     </div>
   );
 }
 
-function MetricCard({ title, value, amount, icon }: { title: string; value: number; amount: number; icon: JSX.Element }): JSX.Element {
+function MetricCard({ title, kind, value, amount, icon, breakdown }: {
+  title: string;
+  kind: PaymentKind;
+  value: number;
+  amount: number;
+  icon: JSX.Element;
+  breakdown?: PaymentMethodSummary;
+}): JSX.Element {
   return (
     <Card className="payment-calendar__metric">
       <Flex align="center" justify="space-between" gap={16}>
         <Statistic title={title} value={value} suffix="adet" />
         <span className="payment-calendar__metric-icon" aria-hidden="true">{icon}</span>
       </Flex>
-      <Typography.Text type="secondary">{currency.format(amount)}</Typography.Text>
+      <strong className={`payment-calendar__metric-amount payment-calendar__metric-amount--${kind}`}>{currency.format(amount)}</strong>
+      {breakdown && <PaymentMethodBreakdown breakdown={breakdown} />}
     </Card>
+  );
+}
+
+function PaymentMethodBreakdown({ breakdown }: { breakdown: PaymentMethodSummary }): JSX.Element {
+  const visibleMethods = paymentMethods.filter((method) => breakdown[method].count > 0);
+  if (visibleMethods.length === 0) return <Typography.Text type="secondary">Odeme yontemi kaydi yok</Typography.Text>;
+
+  return (
+    <div className="payment-calendar__method-breakdown" aria-label="Odeme yontemine gore tamamlananlar">
+      {visibleMethods.map((method) => (
+        <span key={method}>
+          <Typography.Text type="secondary">{paymentMethodLabels[method]}</Typography.Text>
+          <strong>{breakdown[method].count} adet - {currency.format(breakdown[method].amount)}</strong>
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -126,7 +155,7 @@ function CalendarCell({ date, items }: { date: Dayjs; items: PaymentCalendarItem
   );
 }
 
-function SelectedPayments({ date, scope, items }: { date: Dayjs; scope: SelectedScope; items: PaymentCalendarItem[] }): JSX.Element {
+function SelectedPayments({ date, scope, items, onClose }: { date: Dayjs; scope: SelectedScope; items: PaymentCalendarItem[]; onClose: () => void }): JSX.Element {
   return (
     <aside className="payment-calendar__day" aria-labelledby="selected-payment-day-title" aria-label={scope === "date" ? "Secili gun odemeleri" : "Secili ay odemeleri"}>
       <div className="payment-calendar__day-heading">
@@ -136,6 +165,9 @@ function SelectedPayments({ date, scope, items }: { date: Dayjs; scope: Selected
           <Typography.Title id="selected-payment-day-title" level={4}>{scope === "date" ? date.format("D MMMM YYYY") : date.format("MMMM YYYY")}</Typography.Title>
         </div>
         <Tag>{items.length} odeme</Tag>
+        <Tooltip title="Paneli kapat">
+          <Button className="payment-calendar__day-close" type="text" aria-label="Secili gun panelini kapat" icon={<CloseOutlined />} onClick={onClose} />
+        </Tooltip>
       </div>
       <div className="payment-calendar__day-list">
         {items.map((item) => <PaymentSummaryCard key={item.paymentId} item={item} />)}
@@ -155,22 +187,46 @@ function PaymentSummaryCard({ item }: { item: PaymentCalendarItem }): JSX.Elemen
       <div className="payment-calendar__meta">
         <span><BankOutlined aria-hidden="true" />{item.classCode} - {item.className}</span>
         <span><CalendarOutlined aria-hidden="true" />{formatDate(displayDate(item))}</span>
-        <span><UserOutlined aria-hidden="true" />{item.installmentNumber}/{item.installmentTotal}</span>
+        <span><OrderedListOutlined aria-hidden="true" />{item.installmentNumber}/{item.installmentTotal}</span>
       </div>
     </article>
   );
 }
 
-type PaymentSummary = Record<PaymentKind, { count: number; amount: number }>;
+type PaymentMethodSummary = Record<CompletedPaymentMethod, { count: number; amount: number }>;
+type PaymentSummary = {
+  completed: { count: number; amount: number; byMethod: PaymentMethodSummary };
+  installment: { count: number; amount: number };
+  promissory: { count: number; amount: number };
+};
+
+const paymentMethods: CompletedPaymentMethod[] = ["CASH", "CREDIT_CARD", "BANK_TRANSFER"];
+const paymentMethodLabels: Record<CompletedPaymentMethod, string> = {
+  CASH: "Nakit",
+  CREDIT_CARD: "Kredi karti",
+  BANK_TRANSFER: "Havale/EFT",
+};
 
 function buildSummary(items: PaymentCalendarItem[]): PaymentSummary {
   return items.reduce<PaymentSummary>((summary, item) => {
     const kind = paymentKind(item);
     summary[kind].count += 1;
     summary[kind].amount += item.amount;
+    if (kind === "completed" && item.paymentMethod) {
+      summary.completed.byMethod[item.paymentMethod].count += 1;
+      summary.completed.byMethod[item.paymentMethod].amount += item.amount;
+    }
     return summary;
   }, {
-    completed: { count: 0, amount: 0 },
+    completed: {
+      count: 0,
+      amount: 0,
+      byMethod: {
+        CASH: { count: 0, amount: 0 },
+        CREDIT_CARD: { count: 0, amount: 0 },
+        BANK_TRANSFER: { count: 0, amount: 0 },
+      },
+    },
     installment: { count: 0, amount: 0 },
     promissory: { count: 0, amount: 0 },
   });

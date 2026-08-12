@@ -7,6 +7,7 @@ import { DashboardOverview } from "../../features/dashboard";
 import { CoursesWorkspace } from "../../features/courses";
 import { CalendarWorkspace } from "../../features/calendar";
 import { PaymentCalendarWorkspace } from "../../features/payment-calendar";
+import { UserManagementWorkspace } from "../../features/user-management";
 import { AuthorizationWorkspace } from "../../features/authorization";
 import { StudentsWorkspace } from "../../features/students";
 
@@ -15,7 +16,7 @@ type DashboardPageProps = {
   onLogout: () => void;
 };
 
-const dashboardPageKeys = ["dashboard", "students", "courses", "calendar", "paymentCalendar", "finance", "reports", "authorization"] as const;
+const dashboardPageKeys = ["dashboard", "students", "courses", "calendar", "paymentCalendar", "finance", "reports", "userManagement", "authorization"] as const;
 type DashboardPageKey = (typeof dashboardPageKeys)[number];
 const pageQueryKey = "page";
 
@@ -28,6 +29,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps): JSX.Eleme
     ...(user.authorities.includes("class:enrollment:update") ? ["paymentCalendar" as const] : []),
     "finance",
     "reports",
+    ...(user.authorities.includes("user:permission:manage") ? ["userManagement" as const] : []),
     ...(user.authorities.includes("user:permission:manage") ? ["authorization" as const] : []),
   ]), [user.authorities]);
   const [activePage, setActivePage] = useState<DashboardPageKey>(() => pageFromUrl(availablePages));
@@ -54,7 +56,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps): JSX.Eleme
 
   return (
     <AppShell user={user} onLogout={onLogout} activePage={activePage} onNavigate={navigate}>
-      {activePage === "students" ? <StudentsWorkspace user={user} /> : activePage === "courses" ? <CoursesWorkspace user={user} /> : activePage === "calendar" ? <CalendarWorkspace /> : activePage === "paymentCalendar" ? <PaymentCalendarWorkspace /> : activePage === "authorization" ? <AuthorizationWorkspace currentUser={user} /> : <DashboardOverview />}
+      {activePage === "students" ? <StudentsWorkspace user={user} /> : activePage === "courses" ? <CoursesWorkspace user={user} /> : activePage === "calendar" ? <CalendarWorkspace /> : activePage === "paymentCalendar" ? <PaymentCalendarWorkspace /> : activePage === "userManagement" ? <UserManagementWorkspace /> : activePage === "authorization" ? <AuthorizationWorkspace currentUser={user} /> : <DashboardOverview />}
     </AppShell>
   );
 }
