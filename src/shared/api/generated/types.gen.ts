@@ -50,6 +50,14 @@ export type CreateClassRequest = {
      * Must be on or after startDate
      */
     endDate: string;
+    /**
+     * Daily lesson start time
+     */
+    startTime: string;
+    /**
+     * Must be after startTime
+     */
+    endTime: string;
     capacity: number;
     status: ClassStatus;
 };
@@ -78,6 +86,8 @@ export type CourseClass = {
     instructorName: string;
     startDate: string;
     endDate: string;
+    startTime: string;
+    endTime: string;
     capacity: number;
     enrolledCount: number;
     status: ClassStatus;
@@ -268,6 +278,8 @@ export type StudentEnrollment = {
     instructorName: string;
     startDate: string;
     endDate: string;
+    startTime: string;
+    endTime: string;
     classStatus: ClassStatus;
     enrollmentId: string;
     enrollmentStatus: 'ACTIVE' | 'COMPLETED' | 'CANCELLED';

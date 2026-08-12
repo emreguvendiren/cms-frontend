@@ -43,6 +43,8 @@ const enrollment = {
   instructorName: "Murat Aydin",
   startDate: "2026-08-10",
   endDate: "2026-09-02",
+  startTime: "09:00:00",
+  endTime: "18:00:00",
   classStatus: "PLANNED",
   enrollmentId: "enrollment-1",
   enrollmentStatus: "ACTIVE",

@@ -9,7 +9,7 @@ vi.mock("../api/trainingApi", () => api);
 
 const admin = { id: "admin", email: "admin@admin.com", authorities: ["course:create", "course:update", "course:delete", "class:create", "class:update", "class:delete", "class:enrollment:create", "class:enrollment:update", "class:enrollment:delete"] };
 const course = { id: "56d11b06-09d2-4fdf-a286-35f499c4fd50", code: "KRS-001", name: "AutoCAD 2D Teknik Çizim", durationHours: 48, listPrice: 12500, status: "ACTIVE", version: 0 };
-const courseClass = { id: "50286120-df69-49c8-b803-5dfdd9a98287", code: "SNF-041", name: "AutoCAD Hafta İçi Akşam", courseId: course.id, courseCode: course.code, courseName: course.name, instructorName: "Murat Aydın", startDate: "2026-08-10", endDate: "2026-09-02", capacity: 14, enrolledCount: 1, status: "ENROLLMENT_OPEN", version: 0 };
+const courseClass = { id: "50286120-df69-49c8-b803-5dfdd9a98287", code: "SNF-041", name: "AutoCAD Hafta İçi Akşam", courseId: course.id, courseCode: course.code, courseName: course.name, instructorName: "Murat Aydın", startDate: "2026-08-10", endDate: "2026-09-02", startTime: "09:00:00", endTime: "18:00:00", capacity: 14, enrolledCount: 1, status: "ENROLLMENT_OPEN", version: 0 };
 const page = <T,>(content: T[]) => ({ content, page: 0, size: 8, totalElements: content.length, totalPages: content.length ? 1 : 0, first: true, last: true });
 
 beforeEach(() => {
@@ -65,11 +65,12 @@ describe("CoursesWorkspace", () => {
     expect((await screen.findAllByText("Ödeme tamamlandı")).length).toBeGreaterThan(0);
   }, 30000);
 
-  it("sınıf formunda kod ve ders programı yerine tarih aralığı kullanır", async () => {
+  it("sınıf formunda kod ve ders programı yerine tarih aralığı ile ders saatleri kullanır", async () => {
     const user = userEvent.setup(); renderWorkspace(); await user.click(screen.getByRole("tab", { name: /Sınıflar/ })); await user.click(screen.getByRole("button", { name: /Yeni sınıf/ }));
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).queryByLabelText("Sınıf kodu")).not.toBeInTheDocument();
     expect(within(dialog).getByLabelText("Başlangıç ve bitiş tarihi")).toBeInTheDocument();
+    expect(within(dialog).getByLabelText("Ders saatleri")).toBeInTheDocument();
     expect(within(dialog).queryByLabelText("Ders programı")).not.toBeInTheDocument();
   });
 
