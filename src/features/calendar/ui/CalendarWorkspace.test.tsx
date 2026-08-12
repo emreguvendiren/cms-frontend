@@ -20,6 +20,8 @@ const currentClass = {
   instructorName: "Murat Aydın",
   startDate: currentDate.subtract(1, "day").format("YYYY-MM-DD"),
   endDate: currentDate.add(5, "day").format("YYYY-MM-DD"),
+  startTime: "09:00:00",
+  endTime: "18:00:00",
   capacity: 14,
   enrolledCount: 8,
   status: "IN_PROGRESS",
@@ -40,6 +42,7 @@ describe("CalendarWorkspace", () => {
     const selectedDay = await screen.findByRole("complementary");
     expect(within(selectedDay).getByText(currentClass.courseName)).toBeVisible();
     expect(within(selectedDay).getByText(currentClass.instructorName)).toBeVisible();
+    expect(within(selectedDay).getByText("09:00 - 18:00")).toBeVisible();
     expect(within(selectedDay).getByText("8/14")).toBeVisible();
     expect(screen.getAllByText(currentClass.name).length).toBeGreaterThan(1);
   });

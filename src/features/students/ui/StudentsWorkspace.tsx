@@ -62,6 +62,7 @@ type FormValues = {
   schoolName?: string;
   profession?: string;
   address?: string;
+  note?: string;
 };
 type EnrollmentState = { status: "loading" } | { status: "error" } | { status: "success"; enrollments: StudentEnrollment[] };
 type EnrollmentPayment = StudentEnrollment["payments"][number];
@@ -172,6 +173,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", fullName: "", au
       schoolName: s.schoolName ?? undefined,
       profession: s.profession ?? undefined,
       address: s.address ?? undefined,
+      note: s.note ?? undefined,
     };
     form.setFieldsValue(values);
     setFormSnapshot(values);
@@ -210,6 +212,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", fullName: "", au
       schoolName: nullableText(values.schoolName),
       profession: nullableText(values.profession),
       address: nullableText(values.address),
+      note: nullableText(values.note),
     };
     try {
       const saved = editing
@@ -324,6 +327,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", fullName: "", au
             </div>
             <Form.Item name="profession" label="Mesleği"><Input maxLength={120} /></Form.Item>
             <Form.Item name="address" label="Adres"><Input.TextArea rows={4} maxLength={500} showCount /></Form.Item>
+            <Form.Item name="note" label="Not"><Input.TextArea rows={3} maxLength={500} showCount placeholder="Kayıtla ilgili opsiyonel not" /></Form.Item>
           </FormSection>}
           <Flex className="students__form-actions" justify="space-between" gap={12} wrap>
             <Button disabled={currentStep === 0} onClick={() => setCurrentStep((step) => Math.max(step - 1, 0))}>Geri</Button>
@@ -388,7 +392,7 @@ function PaymentDetails({ enrollment }: { enrollment: StudentEnrollment }): JSX.
       { key: "paid", label: "Odenen", children: currency.format(paidAmount) },
       { key: "pending", label: "Bekleyen", children: currency.format(pendingAmount) },
       { key: "start", label: enrollment.paymentPlan === "CASH" ? "Tahmini odeme" : "Ilk vade", children: formatOptionalDate(enrollment.paymentPlan === "CASH" ? enrollment.expectedPaymentDate : enrollment.firstPaymentDate) },
-      { key: "note", label: "Not", span: 2, children: enrollment.note || "-" },
+      { key: "note", label: "Not", children: enrollment.note || "-" },
     ]} />
     <section aria-labelledby={`payment-schedule-${enrollment.enrollmentId}`}><Typography.Title id={`payment-schedule-${enrollment.enrollmentId}`} level={5}>Odeme ve taksit plani</Typography.Title><Table rowKey="id" size="small" pagination={false} dataSource={enrollment.payments} scroll={{ x: 900 }} locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Odeme plani bulunmuyor." /> }} columns={[{ title: "Sira", render: (_, payment) => `${payment.installmentNumber}/${payment.installmentTotal}` }, { title: "Vade", dataIndex: "dueDate", render: formatOptionalDate }, { title: "Tutar", dataIndex: "amount", align: "right", render: (value) => currency.format(value) }, { title: "Durum", dataIndex: "status", render: (value: StudentEnrollment["paymentStatus"]) => <PaymentStatusTag status={value} /> }, { title: "Odeme tarihi", dataIndex: "paidAt", render: formatOptionalDate }, { title: "Tahsilat tipi", dataIndex: "paymentMethod", render: (value: EnrollmentPayment["paymentMethod"]) => value ? paymentMethodLabels[value] : "-" }, { title: "Odemeyi alan", render: (_, payment) => payment.status === "COMPLETED" ? optionalText(payment.receivedByFullName) : "-" }]} /></section>
   </div>;
@@ -439,6 +443,7 @@ function DetailModal({ student, canReveal, canRevealIdentityNumber, onClose }: {
     { key: "school", label: "Okul", children: optionalText(student.schoolName) },
     { key: "profession", label: "Meslek", children: optionalText(student.profession) },
     { key: "address", label: "Adres", children: optionalText(student.address) },
+    { key: "note", label: "Not", children: optionalText(student.note) },
   ]} />{student.status === "INACTIVE" && <Typography.Paragraph>Pasiflik nedeni: {student.inactiveReason}</Typography.Paragraph>}</div>}</Modal>;
 }
 

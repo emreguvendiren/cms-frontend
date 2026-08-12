@@ -32,6 +32,7 @@ const student = {
   schoolName: "Teknik Lise",
   profession: "Teknisyen",
   address: "Konak, Izmir",
+  note: "Hafta ici aksam grubuyla ilgileniyor.",
   version: 0,
 };
 const enrollment = {
@@ -86,6 +87,7 @@ describe("StudentsWorkspace", () => {
     show();
     await user.click(await screen.findByRole("button", { name: "Görüntüle" }));
     const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("Hafta ici aksam grubuyla ilgileniyor.")).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: "Telefon numarasını göster" }));
     expect(await within(dialog).findByText("+905551234567")).toBeInTheDocument();
     expect(api.revealStudentPhone).toHaveBeenCalledWith(student.id);
@@ -140,6 +142,7 @@ describe("StudentsWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "Devam et" }));
     await user.type(await screen.findByLabelText("TC kimlik no"), "10000000146");
     await user.click(screen.getByRole("button", { name: "Devam et" }));
+    await user.type(await screen.findByPlaceholderText("Kayıtla ilgili opsiyonel not"), "Ozellikle hafta ici uygun.");
     await user.click(await screen.findByRole("button", { name: /Kaydet/ }));
     expect(api.createStudent).toHaveBeenCalledWith(expect.objectContaining({
       fullName: "Elif Yilmaz",
@@ -147,6 +150,7 @@ describe("StudentsWorkspace", () => {
       phone: "0555 123 45 67",
       identityNumber: "10000000146",
       gender: "NOT_SPECIFIED",
+      note: "Ozellikle hafta ici uygun.",
     }));
   }, 15000);
 });

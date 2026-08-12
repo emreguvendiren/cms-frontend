@@ -226,6 +226,7 @@ export type CreateStudentRequest = {
     schoolName?: string | null;
     profession?: string | null;
     address?: string | null;
+    note?: string | null;
 };
 
 export type UpdateStudentRequest = CreateStudentRequest & {
@@ -264,6 +265,7 @@ export type Student = {
     schoolName?: string | null;
     profession?: string | null;
     address?: string | null;
+    note?: string | null;
     createdByUserId?: string | null;
     createdByFullName?: string | null;
     version: number;
@@ -1050,6 +1052,41 @@ export type CreateStudentResponses = {
 
 export type CreateStudentResponse = CreateStudentResponses[keyof CreateStudentResponses];
 
+export type DeleteStudentData = {
+    body?: never;
+    path: {
+        studentId: string;
+    };
+    query?: never;
+    url: '/api/students/{studentId}';
+};
+
+export type DeleteStudentErrors = {
+    /**
+     * Authentication failed
+     */
+    401: ApiError;
+    /**
+     * Authenticated user lacks the required authority
+     */
+    403: ApiError;
+    /**
+     * Referenced resource was not found
+     */
+    404: ApiError;
+};
+
+export type DeleteStudentError = DeleteStudentErrors[keyof DeleteStudentErrors];
+
+export type DeleteStudentResponses = {
+    /**
+     * Student soft-deleted
+     */
+    204: void;
+};
+
+export type DeleteStudentResponse = DeleteStudentResponses[keyof DeleteStudentResponses];
+
 export type GetStudentData = {
     body?: never;
     path: {
@@ -1085,83 +1122,13 @@ export type GetStudentResponses = {
 
 export type GetStudentResponse = GetStudentResponses[keyof GetStudentResponses];
 
-export type DeleteStudentData = {
-    body?: never;
-    path: {
-        studentId: string;
-    };
-    query?: never;
-    url: '/api/students/{studentId}/enrollments';
-};
-
-export type DeleteStudentErrors = {
-    /**
-     * Authentication failed
-     */
-    401: ApiError;
-    /**
-     * Authenticated user lacks the required authority
-     */
-    403: ApiError;
-    /**
-     * Referenced resource was not found
-     */
-    404: ApiError;
-};
-
-export type DeleteStudentError = DeleteStudentErrors[keyof DeleteStudentErrors];
-
-export type DeleteStudentResponses = {
-    /**
-     * Student soft-deleted
-     */
-    204: void;
-};
-
-export type DeleteStudentResponse = DeleteStudentResponses[keyof DeleteStudentResponses];
-
-export type ListStudentEnrollmentsData = {
-    body?: never;
-    path: {
-        studentId: string;
-    };
-    query?: never;
-    url: '/api/students/{studentId}/enrollments';
-};
-
-export type ListStudentEnrollmentsErrors = {
-    /**
-     * Authentication failed
-     */
-    401: ApiError;
-    /**
-     * Authenticated user lacks the required authority
-     */
-    403: ApiError;
-    /**
-     * Referenced resource was not found
-     */
-    404: ApiError;
-};
-
-export type ListStudentEnrollmentsError = ListStudentEnrollmentsErrors[keyof ListStudentEnrollmentsErrors];
-
-export type ListStudentEnrollmentsResponses = {
-    /**
-     * Student course enrollments with payment schedules
-     */
-    200: Array<StudentEnrollment>;
-};
-
-export type ListStudentEnrollmentsResponse = ListStudentEnrollmentsResponses[keyof ListStudentEnrollmentsResponses];
-
 export type UpdateStudentData = {
     body: UpdateStudentRequest;
     path: {
         studentId: string;
     };
     query?: never;
-    url: '/api/students/{studentId}/enrollments';
+    url: '/api/students/{studentId}';
 };
 
 export type UpdateStudentErrors = {
@@ -1197,6 +1164,41 @@ export type UpdateStudentResponses = {
 };
 
 export type UpdateStudentResponse = UpdateStudentResponses[keyof UpdateStudentResponses];
+
+export type ListStudentEnrollmentsData = {
+    body?: never;
+    path: {
+        studentId: string;
+    };
+    query?: never;
+    url: '/api/students/{studentId}/enrollments';
+};
+
+export type ListStudentEnrollmentsErrors = {
+    /**
+     * Authentication failed
+     */
+    401: ApiError;
+    /**
+     * Authenticated user lacks the required authority
+     */
+    403: ApiError;
+    /**
+     * Referenced resource was not found
+     */
+    404: ApiError;
+};
+
+export type ListStudentEnrollmentsError = ListStudentEnrollmentsErrors[keyof ListStudentEnrollmentsErrors];
+
+export type ListStudentEnrollmentsResponses = {
+    /**
+     * Student course enrollments with payment schedules
+     */
+    200: Array<StudentEnrollment>;
+};
+
+export type ListStudentEnrollmentsResponse = ListStudentEnrollmentsResponses[keyof ListStudentEnrollmentsResponses];
 
 export type RevealStudentPhoneData = {
     body?: never;

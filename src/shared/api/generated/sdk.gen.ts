@@ -162,32 +162,32 @@ export const createStudent = <ThrowOnError extends boolean = false>(options: Opt
     }
 });
 
+export const deleteStudent = <ThrowOnError extends boolean = false>(options: Options<DeleteStudentData, ThrowOnError>): RequestResult<DeleteStudentResponses, DeleteStudentErrors, ThrowOnError> => (options.client ?? client).delete<DeleteStudentResponses, DeleteStudentErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/students/{studentId}',
+    ...options
+});
+
 export const getStudent = <ThrowOnError extends boolean = false>(options: Options<GetStudentData, ThrowOnError>): RequestResult<GetStudentResponses, GetStudentErrors, ThrowOnError> => (options.client ?? client).get<GetStudentResponses, GetStudentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/students/{studentId}',
     ...options
 });
 
-export const deleteStudent = <ThrowOnError extends boolean = false>(options: Options<DeleteStudentData, ThrowOnError>): RequestResult<DeleteStudentResponses, DeleteStudentErrors, ThrowOnError> => (options.client ?? client).delete<DeleteStudentResponses, DeleteStudentErrors, ThrowOnError>({
+export const updateStudent = <ThrowOnError extends boolean = false>(options: Options<UpdateStudentData, ThrowOnError>): RequestResult<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError> => (options.client ?? client).put<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/students/{studentId}/enrollments',
-    ...options
+    url: '/api/students/{studentId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 export const listStudentEnrollments = <ThrowOnError extends boolean = false>(options: Options<ListStudentEnrollmentsData, ThrowOnError>): RequestResult<ListStudentEnrollmentsResponses, ListStudentEnrollmentsErrors, ThrowOnError> => (options.client ?? client).get<ListStudentEnrollmentsResponses, ListStudentEnrollmentsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/students/{studentId}/enrollments',
     ...options
-});
-
-export const updateStudent = <ThrowOnError extends boolean = false>(options: Options<UpdateStudentData, ThrowOnError>): RequestResult<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError> => (options.client ?? client).put<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/students/{studentId}/enrollments',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });
 
 /**

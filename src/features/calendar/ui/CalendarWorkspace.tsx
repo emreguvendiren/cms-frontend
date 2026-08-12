@@ -144,7 +144,7 @@ function ClassSummary({ item }: { item: CourseClass }): JSX.Element {
         <div><Typography.Text type="secondary">{item.courseName}</Typography.Text><strong>{item.name}</strong></div>
         <Tag className={`class-calendar__status class-calendar__status--${item.status.toLocaleLowerCase()}`} icon={completed ? <CheckCircleOutlined /> : <ClockCircleOutlined />}>{statusLabels[item.status]}</Tag>
       </Flex>
-      <div className="class-calendar__meta"><span><UserOutlined aria-hidden="true" />{item.instructorName}</span><span><CalendarOutlined aria-hidden="true" />{formatDate(item.startDate)} - {formatDate(item.endDate)}</span></div>
+      <div className="class-calendar__meta"><span><UserOutlined aria-hidden="true" />{item.instructorName}</span><span><CalendarOutlined aria-hidden="true" />{formatDate(item.startDate)} - {formatDate(item.endDate)}</span><span><ClockCircleOutlined aria-hidden="true" />{formatTimeRange(item.startTime, item.endTime)}</span></div>
       <div className="class-calendar__occupancy"><Flex justify="space-between"><span><TeamOutlined aria-hidden="true" /> Doluluk</span><strong>{item.enrolledCount}/{item.capacity}</strong></Flex><Progress percent={occupancy} showInfo={false} size="small" /></div>
     </article>
   );
@@ -162,4 +162,12 @@ function overlapsMonth(item: CourseClass, date: Dayjs): boolean {
 
 function formatDate(value: string): string {
   return dateFormatter.format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatTimeRange(startTime: string, endTime: string): string {
+  return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+}
+
+function formatTime(value: string): string {
+  return value.slice(0, 5);
 }
