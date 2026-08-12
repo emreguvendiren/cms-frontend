@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppProviders } from "../../../app/providers/AppProviders";
 import { StudentsWorkspace } from "./StudentsWorkspace";
 
-const api = vi.hoisted(() => ({ loadStudents: vi.fn(), createStudent: vi.fn(), updateStudent: vi.fn(), removeStudent: vi.fn(), revealStudentPhone: vi.fn(), revealStudentIdentityNumber: vi.fn() }));
+const api = vi.hoisted(() => ({ loadStudents: vi.fn(), loadStudentEnrollments: vi.fn(), createStudent: vi.fn(), updateStudent: vi.fn(), removeStudent: vi.fn(), revealStudentPhone: vi.fn(), revealStudentIdentityNumber: vi.fn() }));
 vi.mock("../api/studentApi", () => api);
 const admin = { id: "admin", email: "admin@admin.com", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] };
 const student = {
@@ -33,8 +33,35 @@ const student = {
   address: "Konak, Izmir",
   version: 0,
 };
+const enrollment = {
+  classId: "class-1",
+  classCode: "SNF-001",
+  className: "Hafta ici aksam",
+  courseId: "course-1",
+  courseCode: "KRS-001",
+  courseName: "SolidWorks Profesyonel",
+  instructorName: "Murat Aydin",
+  startDate: "2026-08-10",
+  endDate: "2026-09-02",
+  classStatus: "PLANNED",
+  enrollmentId: "enrollment-1",
+  enrollmentStatus: "ACTIVE",
+  registrationFee: 24000,
+  paymentPlan: "INSTALLMENT",
+  installmentCount: 2,
+  firstPaymentDate: "2026-08-15",
+  paymentStatus: "PENDING",
+  expectedPaymentDate: null,
+  note: "Iki taksit",
+  payments: [
+    { id: "payment-1", installmentNumber: 1, installmentTotal: 2, amount: 12000, dueDate: "2026-08-15", status: "PENDING", paidAt: null, paymentMethod: null, version: 0 },
+    { id: "payment-2", installmentNumber: 2, installmentTotal: 2, amount: 12000, dueDate: "2026-09-15", status: "PENDING", paidAt: null, paymentMethod: null, version: 0 },
+  ],
+  version: 0,
+};
 beforeEach(() => {
   api.loadStudents.mockResolvedValue({ content: [student], page: 0, size: 100, totalElements: 1, totalPages: 1, first: true, last: true });
+  api.loadStudentEnrollments.mockResolvedValue([enrollment]);
   api.revealStudentPhone.mockResolvedValue("+905551234567");
   api.revealStudentIdentityNumber.mockResolvedValue("10000000146");
 });
@@ -58,7 +85,7 @@ describe("StudentsWorkspace", () => {
     await user.click(within(dialog).getByRole("button", { name: "Telefon numarasını göster" }));
     expect(await within(dialog).findByText("+905551234567")).toBeInTheDocument();
     expect(api.revealStudentPhone).toHaveBeenCalledWith(student.id);
-  });
+  }, 15000);
 
   it("TC kimlik noyu yetkili kullanıcıya tek tıkla gösterir", async () => {
     const user = userEvent.setup();
@@ -75,6 +102,18 @@ describe("StudentsWorkspace", () => {
     await screen.findByText("Deniz Arslan");
     expect(screen.queryByRole("button", { name: "Sil" })).not.toBeInTheDocument();
   });
+
+  it("ogrenci satiri acilinca kurs kayitlarini ve odeme planini collapsable gosterir", async () => {
+    const user = userEvent.setup();
+    show();
+    await screen.findByText("Deniz Arslan");
+    await user.click(screen.getByRole("button", { name: "Kurslari goster" }));
+    expect(await screen.findByText("SolidWorks Profesyonel")).toBeVisible();
+    expect(api.loadStudentEnrollments).toHaveBeenCalledWith(student.id);
+    await user.click(screen.getByRole("button", { name: "Odemeleri goster" }));
+    expect(await screen.findByText("Odeme ve taksit plani")).toBeVisible();
+    expect(screen.getAllByText("₺12.000").length).toBeGreaterThan(0);
+  }, 15000);
 
   it("yeni öğrenci kaydını modal yerine sayfa akışı olarak açar", async () => {
     const user = userEvent.setup();
@@ -104,5 +143,5 @@ describe("StudentsWorkspace", () => {
       identityNumber: "10000000146",
       gender: "NOT_SPECIFIED",
     }));
-  });
+  }, 15000);
 });

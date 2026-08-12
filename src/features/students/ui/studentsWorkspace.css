@@ -23,6 +23,11 @@
 .students__detail { display: grid; gap: 24px; }
 .students__detail h4.ant-typography { margin: 0 0 8px; }
 .students__enrollment { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid var(--app-neutral-200); border-radius: 8px; }
+.students__expanded-state { display: flex; align-items: center; gap: 8px; padding: 16px; color: var(--app-neutral-600); }
+.students__expanded-state--error { justify-content: space-between; border: 1px solid var(--app-danger, #dc2626); border-radius: 8px; color: var(--app-danger, #dc2626); }
+.students__enrollments { min-width: 0; }
+.students__payment-details { display: grid; gap: 16px; padding: 12px 0; }
+.students__payment-details h5.ant-typography { margin: 0 0 8px; }
 
 @media (max-width: 767px) {
   .students__heading { align-items: stretch !important; flex-direction: column; }
@@ -32,6 +37,7 @@
   .students__toolbar .ant-select { width: 100%; }
   .students__form-actions, .students__form-actions .ant-space { width: 100%; }
   .students__form-actions .ant-space { justify-content: flex-end; }
+  .students__enrollments .ant-table-wrapper, .students__payment-details .ant-table-wrapper { overflow-x: auto; }
 }
 
 @media (min-width: 768px) and (max-width: 1100px) {

@@ -1,14 +1,18 @@
 import { getAccessToken } from "../../auth";
 import { environment } from "../../../shared/config/environment";
-import { createStudent as createRequest, deleteStudent as deleteRequest, listStudents as listRequest,
+import { createStudent as createRequest, deleteStudent as deleteRequest,
+  listStudentEnrollments as listStudentEnrollmentsRequest, listStudents as listRequest,
   revealStudentIdentityNumber as revealIdentityNumberRequest, revealStudentPhone as revealRequest, updateStudent as updateRequest,
-  type CreateStudentRequest, type Student, type StudentPage, type StudentStatus, type UpdateStudentRequest,
+  type CreateStudentRequest, type Student, type StudentEnrollment, type StudentPage, type StudentStatus, type UpdateStudentRequest,
 } from "../../../shared/api/generated";
 
 function options() { return { auth: getAccessToken() ?? undefined, baseUrl: environment.apiBaseUrl,
   credentials: "include" as const, throwOnError: true as const }; }
 export async function loadStudents(search = "", status?: StudentStatus): Promise<StudentPage> {
   return (await listRequest({ ...options(), query: { search, status, page: 0, size: 100 } })).data;
+}
+export async function loadStudentEnrollments(id: string): Promise<StudentEnrollment[]> {
+  return (await listStudentEnrollmentsRequest({ ...options(), path: { studentId: id } })).data;
 }
 export async function createStudent(body: CreateStudentRequest): Promise<Student> {
   return (await createRequest({ ...options(), body })).data;
@@ -23,4 +27,4 @@ export async function revealStudentPhone(id: string): Promise<string> {
 export async function revealStudentIdentityNumber(id: string): Promise<string> {
   return (await revealIdentityNumberRequest({ ...options(), path: { studentId: id } })).data.identityNumber;
 }
-export type { CreateStudentRequest, Student, StudentStatus, UpdateStudentRequest } from "../../../shared/api/generated";
+export type { CreateStudentRequest, Student, StudentEnrollment, StudentStatus, UpdateStudentRequest } from "../../../shared/api/generated";
