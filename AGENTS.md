@@ -75,6 +75,14 @@ Run:
 
 ## UI and UX requirements
 
+### Language and localization
+
+- User-facing Turkish copy must use correct Turkish characters.
+- Do not write ASCII-only approximations such as `Kullanicilar`,
+  `Sifre`, `Gecerli`, `olusturuldu` or `yuklenemedi` in visible UI text.
+- Prefer Turkish field labels for business concepts, for example use
+  `Ad soyad` instead of `Full name`.
+
 ### Mandatory responsive design rule
 
 Every user interface and every visual state must be responsive by design.

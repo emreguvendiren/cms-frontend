@@ -27,7 +27,7 @@ const navigationItems = [
   { key: "paymentCalendar", icon: <CreditCardOutlined />, label: "Odeme Takvimi", requiredAuthority: "class:enrollment:update" },
   { key: "finance", icon: <BankOutlined />, label: "Finans" },
   { key: "reports", icon: <PieChartOutlined />, label: "Raporlar" },
-  { key: "userManagement", icon: <UserOutlined />, label: "Kullanici Yonetimi", requiredAuthority: "user:permission:manage" },
+  { key: "userManagement", icon: <UserOutlined />, label: "Kullanıcı Yönetimi", requiredAuthority: "user:permission:manage" },
   { key: "authorization", icon: <SafetyCertificateOutlined />, label: "Rol ve yetkiler", requiredAuthority: "user:permission:manage" },
 ];
 

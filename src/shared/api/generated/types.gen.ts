@@ -447,6 +447,43 @@ export type ListManagedUsersResponses = {
 
 export type ListManagedUsersResponse = ListManagedUsersResponses[keyof ListManagedUsersResponses];
 
+export type CreateManagedUserData = {
+    body: CreateManagedUserRequest;
+    path?: never;
+    query?: never;
+    url: '/api/admin/users';
+};
+
+export type CreateManagedUserErrors = {
+    /**
+     * Invalid request
+     */
+    400: ApiError;
+    /**
+     * Authentication failed
+     */
+    401: ApiError;
+    /**
+     * Authenticated user lacks the required authority
+     */
+    403: ApiError;
+    /**
+     * Unique code or resource state conflict
+     */
+    409: ApiError;
+};
+
+export type CreateManagedUserError = CreateManagedUserErrors[keyof CreateManagedUserErrors];
+
+export type CreateManagedUserResponses = {
+    /**
+     * User account created
+     */
+    201: ManagedUser;
+};
+
+export type CreateManagedUserResponse = CreateManagedUserResponses[keyof CreateManagedUserResponses];
+
 export type ReplaceUserAuthoritiesData = {
     body: ReplaceAuthoritiesRequest;
     path: {
@@ -1046,43 +1083,6 @@ export type GetPaymentCalendarResponses = {
 };
 
 export type GetPaymentCalendarResponse = GetPaymentCalendarResponses[keyof GetPaymentCalendarResponses];
-
-export type CreateManagedUserData = {
-    body: CreateManagedUserRequest;
-    path?: never;
-    query?: never;
-    url: '/api/payment-calendar';
-};
-
-export type CreateManagedUserErrors = {
-    /**
-     * Invalid request
-     */
-    400: ApiError;
-    /**
-     * Authentication failed
-     */
-    401: ApiError;
-    /**
-     * Authenticated user lacks the required authority
-     */
-    403: ApiError;
-    /**
-     * Unique code or resource state conflict
-     */
-    409: ApiError;
-};
-
-export type CreateManagedUserError = CreateManagedUserErrors[keyof CreateManagedUserErrors];
-
-export type CreateManagedUserResponses = {
-    /**
-     * User account created
-     */
-    201: ManagedUser;
-};
-
-export type CreateManagedUserResponse = CreateManagedUserResponses[keyof CreateManagedUserResponses];
 
 export type ListStudentsData = {
     body?: never;

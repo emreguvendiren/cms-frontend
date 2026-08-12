@@ -49,9 +49,9 @@ export function UserManagementWorkspace(): JSX.Element {
       setPage(0);
       setUsers((items) => [created, ...items.filter((item) => item.id !== created.id)].slice(0, 10));
       setTotal((value) => value + 1);
-      message.success(`${created.email} kullanicisi olusturuldu.`);
+      message.success(`${created.email} kullanıcısı oluşturuldu.`);
     } catch {
-      message.error("Kullanici olusturulamadi. E-posta adresini ve sifre alanlarini kontrol edin.");
+      message.error("Kullanıcı oluşturulamadı. E-posta adresini ve şifre alanlarını kontrol edin.");
     } finally {
       setCreating(false);
     }
@@ -61,48 +61,48 @@ export function UserManagementWorkspace(): JSX.Element {
     <section className="user-management">
       <Flex className="user-management__header" justify="space-between" align="start" gap={16} wrap>
         <div>
-          <Typography.Title level={2}>Kullanici Yonetimi</Typography.Title>
-          <Typography.Text type="secondary">Sisteme giris yapacak kullanicilari olusturun ve mevcut hesaplari izleyin.</Typography.Text>
+          <Typography.Title level={2}>Kullanıcı Yönetimi</Typography.Title>
+          <Typography.Text type="secondary">Sisteme giriş yapacak kullanıcıları oluşturun ve mevcut hesapları izleyin.</Typography.Text>
         </div>
       </Flex>
 
       <div className="user-management__layout">
         <section className="user-management__form-panel" aria-labelledby="create-user-title">
-          <Typography.Title id="create-user-title" level={4}>Yeni kullanici</Typography.Title>
+          <Typography.Title id="create-user-title" level={4}>Yeni kullanıcı</Typography.Title>
           <Form form={form} layout="vertical" onFinish={(values) => void submit(values)} requiredMark="optional">
-            <Form.Item name="fullName" label="Full name" rules={[{ required: true, message: "Full name zorunludur." }, { max: 160, message: "Full name en fazla 160 karakter olabilir." }]}>
+            <Form.Item name="fullName" label="Ad soyad" rules={[{ required: true, message: "Ad soyad zorunludur." }, { max: 160, message: "Ad soyad en fazla 160 karakter olabilir." }]}>
               <Input autoComplete="name" />
             </Form.Item>
-            <Form.Item name="email" label="Mail" rules={[{ required: true, message: "Mail zorunludur." }, { type: "email", message: "Gecerli bir mail adresi girin." }, { max: 254, message: "Mail en fazla 254 karakter olabilir." }]}>
+            <Form.Item name="email" label="Mail" rules={[{ required: true, message: "Mail zorunludur." }, { type: "email", message: "Geçerli bir mail adresi girin." }, { max: 254, message: "Mail en fazla 254 karakter olabilir." }]}>
               <Input autoComplete="email" />
             </Form.Item>
-            <Form.Item name="password" label="Sifre" rules={[{ required: true, message: "Sifre zorunludur." }, { min: 8, message: "Sifre en az 8 karakter olmalidir." }, { max: 100, message: "Sifre en fazla 100 karakter olabilir." }]}>
+            <Form.Item name="password" label="Şifre" rules={[{ required: true, message: "Şifre zorunludur." }, { min: 8, message: "Şifre en az 8 karakter olmalıdır." }, { max: 100, message: "Şifre en fazla 100 karakter olabilir." }]}>
               <Input.Password autoComplete="new-password" />
             </Form.Item>
-            <Form.Item name="passwordConfirm" label="Sifreyi dogrula" dependencies={["password"]} rules={[
-              { required: true, message: "Sifre dogrulama zorunludur." },
+            <Form.Item name="passwordConfirm" label="Şifreyi doğrula" dependencies={["password"]} rules={[
+              { required: true, message: "Şifre doğrulama zorunludur." },
               ({ getFieldValue }) => ({
                 validator(_, value: string | undefined) {
                   if (!value || getFieldValue("password") === value) return Promise.resolve();
-                  return Promise.reject(new Error("Sifreler eslesmiyor."));
+                  return Promise.reject(new Error("Şifreler eşleşmiyor."));
                 },
               }),
             ]}>
               <Input.Password autoComplete="new-password" />
             </Form.Item>
-            <Button type="primary" htmlType="submit" loading={creating} icon={<UserAddOutlined aria-hidden="true" />}>Kullanici olustur</Button>
+            <Button type="primary" htmlType="submit" loading={creating} icon={<UserAddOutlined aria-hidden="true" />}>Kullanıcı oluştur</Button>
           </Form>
         </section>
 
         <section className="user-management__list-panel" aria-labelledby="users-title">
           <Flex justify="space-between" align="center" gap={16} wrap>
-            <Typography.Title id="users-title" level={4}>Kullanicilar</Typography.Title>
-            <Input className="user-management__search" aria-label="Kullanici ara" prefix={<SearchOutlined />} placeholder="E-posta ile ara" value={search} onChange={(event) => { setSearch(event.target.value); setPage(0); }} allowClear />
+            <Typography.Title id="users-title" level={4}>Kullanıcılar</Typography.Title>
+            <Input className="user-management__search" aria-label="Kullanıcı ara" prefix={<SearchOutlined />} placeholder="E-posta ile ara" value={search} onChange={(event) => { setSearch(event.target.value); setPage(0); }} allowClear />
           </Flex>
-          {error && <StatusLine tone="error" title="Kullanicilar yuklenemedi" description="Baglantiyi kontrol edip yeniden deneyin." action={<Button onClick={() => void reload()}>Tekrar dene</Button>} />}
+          {error && <StatusLine tone="error" title="Kullanıcılar yüklenemedi" description="Bağlantıyı kontrol edip yeniden deneyin." action={<Button onClick={() => void reload()}>Tekrar dene</Button>} />}
           <Spin spinning={loading}>
             <Table className="user-management__table" rowKey="id" dataSource={users} pagination={{ current: page + 1, pageSize: 10, total, showSizeChanger: false, onChange: (value) => setPage(value - 1) }}
-              locale={{ emptyText: <Empty description={search ? "Aramayla eslesen kullanici yok." : "Henuz kullanici yok."} /> }}
+              locale={{ emptyText: <Empty description={search ? "Aramayla eşleşen kullanıcı yok." : "Henüz kullanıcı yok."} /> }}
               columns={[
                 { title: "Ad soyad", dataIndex: "fullName" },
                 { title: "Mail", dataIndex: "email" },

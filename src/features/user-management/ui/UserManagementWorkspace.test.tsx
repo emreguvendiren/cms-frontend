@@ -27,11 +27,11 @@ describe("UserManagementWorkspace", () => {
 
     renderWorkspace();
 
-    await user.type(await screen.findByLabelText("Full name"), "Staff User");
+    await user.type(await screen.findByLabelText("Ad soyad"), "Staff User");
     await user.type(screen.getByLabelText("Mail"), "staff@example.com");
-    await user.type(screen.getByLabelText("Sifre"), "StrongPass1!");
-    await user.type(screen.getByLabelText("Sifreyi dogrula"), "StrongPass1!");
-    await user.click(screen.getByRole("button", { name: "Kullanici olustur" }));
+    await user.type(screen.getByLabelText("Şifre"), "StrongPass1!");
+    await user.type(screen.getByLabelText("Şifreyi doğrula"), "StrongPass1!");
+    await user.click(screen.getByRole("button", { name: "Kullanıcı oluştur" }));
 
     await waitFor(() => expect(api.createUser).toHaveBeenCalledWith({
       fullName: "Staff User",
@@ -46,13 +46,13 @@ describe("UserManagementWorkspace", () => {
     const user = userEvent.setup();
     renderWorkspace();
 
-    await user.type(await screen.findByLabelText("Full name"), "Staff User");
+    await user.type(await screen.findByLabelText("Ad soyad"), "Staff User");
     await user.type(screen.getByLabelText("Mail"), "staff@example.com");
-    await user.type(screen.getByLabelText("Sifre"), "StrongPass1!");
-    await user.type(screen.getByLabelText("Sifreyi dogrula"), "Different1!");
-    await user.click(screen.getByRole("button", { name: "Kullanici olustur" }));
+    await user.type(screen.getByLabelText("Şifre"), "StrongPass1!");
+    await user.type(screen.getByLabelText("Şifreyi doğrula"), "Different1!");
+    await user.click(screen.getByRole("button", { name: "Kullanıcı oluştur" }));
 
-    expect(await screen.findByText("Sifreler eslesmiyor.")).toBeInTheDocument();
+    expect(await screen.findByText("Şifreler eşleşmiyor.")).toBeInTheDocument();
     expect(api.createUser).not.toHaveBeenCalled();
   });
 });

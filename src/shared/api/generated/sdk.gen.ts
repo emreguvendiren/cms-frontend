@@ -30,6 +30,16 @@ export const listManagedUsers = <ThrowOnError extends boolean = false>(options?:
     ...options
 });
 
+export const createManagedUser = <ThrowOnError extends boolean = false>(options: Options<CreateManagedUserData, ThrowOnError>): RequestResult<CreateManagedUserResponses, CreateManagedUserErrors, ThrowOnError> => (options.client ?? client).post<CreateManagedUserResponses, CreateManagedUserErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
 export const replaceUserAuthorities = <ThrowOnError extends boolean = false>(options: Options<ReplaceUserAuthoritiesData, ThrowOnError>): RequestResult<ReplaceUserAuthoritiesResponses, ReplaceUserAuthoritiesErrors, ThrowOnError> => (options.client ?? client).put<ReplaceUserAuthoritiesResponses, ReplaceUserAuthoritiesErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/admin/users/{userId}/authorities',
@@ -150,16 +160,6 @@ export const getPaymentCalendar = <ThrowOnError extends boolean = false>(options
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/payment-calendar',
     ...options
-});
-
-export const createManagedUser = <ThrowOnError extends boolean = false>(options: Options<CreateManagedUserData, ThrowOnError>): RequestResult<CreateManagedUserResponses, CreateManagedUserErrors, ThrowOnError> => (options.client ?? client).post<CreateManagedUserResponses, CreateManagedUserErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/payment-calendar',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });
 
 export const listStudents = <ThrowOnError extends boolean = false>(options?: Options<ListStudentsData, ThrowOnError>): RequestResult<ListStudentsResponses, ListStudentsErrors, ThrowOnError> => (options?.client ?? client).get<ListStudentsResponses, ListStudentsErrors, ThrowOnError>({
