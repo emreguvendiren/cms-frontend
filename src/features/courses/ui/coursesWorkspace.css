@@ -35,7 +35,7 @@
 .courses__payment-schedule { display: grid; gap: 8px; padding: 8px 16px 16px; }
 .courses__payment-details { display: grid; gap: 24px; padding-top: 8px; }
 .courses__payment-details h5.ant-typography { margin: 0 0 8px; }
-.courses__payment-details .ant-table-wrapper { overflow: hidden; border: 1px solid var(--app-neutral-200); border-radius: 8px; }
+.courses__payment-details .ant-table-wrapper { max-width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--app-neutral-200); border-radius: 8px; }
 .courses__payment-status { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
 .courses__payment-status--completed { color: var(--app-success); background: var(--app-success-soft); border-color: var(--app-success-border); }
 .courses__payment-status--pending { color: var(--app-warning); background: var(--app-warning-soft); border-color: var(--app-warning-border); }
