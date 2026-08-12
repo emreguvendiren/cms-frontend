@@ -8,8 +8,8 @@ import * as api from "../api/authorizationApi";
 vi.mock("../api/authorizationApi", () => ({ loadAuthorizationCatalog: vi.fn(), loadManagedUsers: vi.fn(), saveUserAuthorities: vi.fn() }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
-const admin = { id: "11111111-1111-1111-1111-111111111111", email: "admin@admin.com", authorities: ["user:permission:manage"] };
-const target = { id: "22222222-2222-2222-2222-222222222222", email: "staff@example.com", enabled: true, authorities: ["profile:read"] };
+const admin = { id: "11111111-1111-1111-1111-111111111111", email: "admin@admin.com", fullName: "Admin User", authorities: ["user:permission:manage"] };
+const target = { id: "22222222-2222-2222-2222-222222222222", email: "staff@example.com", fullName: "Staff User", enabled: true, authorities: ["profile:read"] };
 
 describe("AuthorizationWorkspace", () => {
   it("kullanıcıları yükler ve rol şablonuyla yetkileri günceller", async () => {

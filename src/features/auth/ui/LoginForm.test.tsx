@@ -107,6 +107,6 @@ function loginResponse(): unknown {
     accessToken: "access-token",
     tokenType: "Bearer",
     expiresAt: "2026-08-05T12:00:00Z",
-    user: { id: "user-id", email: "user@example.com", authorities: [] },
+    user: { id: "user-id", email: "user@example.com", fullName: "Test User", authorities: [] },
   };
 }

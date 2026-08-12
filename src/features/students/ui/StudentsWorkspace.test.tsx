@@ -6,7 +6,7 @@ import { StudentsWorkspace } from "./StudentsWorkspace";
 
 const api = vi.hoisted(() => ({ loadStudents: vi.fn(), loadStudentEnrollments: vi.fn(), createStudent: vi.fn(), updateStudent: vi.fn(), removeStudent: vi.fn(), revealStudentPhone: vi.fn(), revealStudentIdentityNumber: vi.fn() }));
 vi.mock("../api/studentApi", () => api);
-const admin = { id: "admin", email: "admin@admin.com", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] };
+const admin = { id: "admin", email: "admin@admin.com", fullName: "Admin User", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] };
 const student = {
   id: "83f97d7d-9951-4759-a2e6-71155cb0a901",
   fullName: "Deniz Arslan",
@@ -22,6 +22,7 @@ const student = {
   gender: "MALE",
   status: "ACTIVE",
   activeCourse: "SolidWorks Profesyonel",
+  createdByFullName: "Kayit Danismani",
   registrationDate: "2026-08-06",
   source: "Web sitesi",
   kvkkConsent: true,
@@ -57,7 +58,7 @@ const enrollment = {
   note: "Iki taksit",
   payments: [
     { id: "payment-1", installmentNumber: 1, installmentTotal: 2, amount: 12000, dueDate: "2026-08-15", status: "PENDING", paidAt: null, paymentMethod: null, version: 0 },
-    { id: "payment-2", installmentNumber: 2, installmentTotal: 2, amount: 12000, dueDate: "2026-09-15", status: "PENDING", paidAt: null, paymentMethod: null, version: 0 },
+    { id: "payment-2", installmentNumber: 2, installmentTotal: 2, amount: 12000, dueDate: "2026-09-15", status: "COMPLETED", paidAt: "2026-09-15", paymentMethod: "CASH", receivedByFullName: "Muhasebe Uzmani", version: 0 },
   ],
   version: 0,
 };
@@ -76,6 +77,7 @@ describe("StudentsWorkspace", () => {
     expect(await screen.findByText("Deniz Arslan")).toBeVisible();
     expect(screen.getByText("*** *** ** **")).toBeVisible();
     expect(screen.getByText("***********")).toBeVisible();
+    expect(await screen.findByText(/Kayit Danismani/)).toBeVisible();
     expect(api.loadStudents).toHaveBeenCalled();
   });
 
@@ -114,6 +116,7 @@ describe("StudentsWorkspace", () => {
     expect(api.loadStudentEnrollments).toHaveBeenCalledWith(student.id);
     await user.click(screen.getByRole("button", { name: "Odemeleri goster" }));
     expect(await screen.findByText("Odeme ve taksit plani")).toBeVisible();
+    expect(screen.getByText("Muhasebe Uzmani")).toBeVisible();
     expect(screen.getAllByText("₺12.000").length).toBeGreaterThan(0);
   }, 15000);
 

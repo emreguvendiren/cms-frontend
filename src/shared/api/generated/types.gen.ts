@@ -18,6 +18,7 @@ export type ReplaceAuthoritiesRequest = {
 export type ManagedUser = {
     id: string;
     email: string;
+    fullName: string;
     enabled: boolean;
     authorities: Array<string>;
 };
@@ -121,6 +122,8 @@ export type EnrollmentPayment = {
     status: PaymentStatus;
     paidAt?: string | null;
     paymentMethod?: PaymentMethod | null;
+    receivedByUserId?: string | null;
+    receivedByFullName?: string | null;
     version: number;
 };
 
@@ -261,6 +264,8 @@ export type Student = {
     schoolName?: string | null;
     profession?: string | null;
     address?: string | null;
+    createdByUserId?: string | null;
+    createdByFullName?: string | null;
     version: number;
 };
 
@@ -321,6 +326,7 @@ export type AccessTokenResponse = {
 export type UserResponse = {
     id: string;
     email: string;
+    fullName: string;
     authorities: Array<string>;
 };
 

@@ -87,7 +87,7 @@ const optionalText = (value?: string | null) => value || "-";
 const nullableText = (value?: string) => value?.trim() || null;
 const formatOptionalDate = (value?: string | null) => value ? formatDate(value) : "-";
 
-export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] } }: { user?: AuthenticatedUser }): JSX.Element {
+export function StudentsWorkspace({ user = { id: "", email: "", fullName: "", authorities: ["student:delete", "student:phone:reveal", "student:identity-number:reveal"] } }: { user?: AuthenticatedUser }): JSX.Element {
   const { message, modal } = App.useApp();
   const screens = Grid.useBreakpoint();
   const [form] = Form.useForm<FormValues>();
@@ -258,7 +258,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["s
     { title: "Telefon", dataIndex: "phoneMasked" },
     { title: "TC", dataIndex: "identityNumberMasked" },
     { title: "Durum", dataIndex: "status", render: (v) => <StatusTag status={v} /> },
-    { title: "Aktif eğitim", dataIndex: "activeCourse", render: optionalText },
+    { title: "Kaydı alan", dataIndex: "createdByFullName", render: optionalText },
     { title: "Kayıt tarihi", dataIndex: "registrationDate", render: formatDate },
     { title: "İşlemler", width: 144, render: (_, s) => actions(s) },
   ];
@@ -346,7 +346,7 @@ export function StudentsWorkspace({ user = { id: "", email: "", authorities: ["s
     <div className="students__toolbar"><Input aria-label="Öğrenci ara" prefix={<SearchOutlined />} placeholder="Ad, e-posta, okul veya meslek ara" value={query} onChange={(e) => setQuery(e.target.value)} allowClear /><Select aria-label="Öğrenci durumuna göre filtrele" value={status} onChange={setStatus} options={[{ value: "all", label: "Tüm durumlar" }, ...Object.entries(statusLabels).map(([value, label]) => ({ value, label }))]} /></div>
     {!loading && filtered.length === 0 ? <Empty description="Öğrenci kaydı bulunamadı." /> : screens.md
       ? <Table loading={loading} rowKey="id" columns={columns} dataSource={filtered} pagination={{ pageSize: 8, showSizeChanger: false }} expandable={{ expandedRowKeys: expandedStudentIds, onExpand: (expanded, record) => toggleStudent(expanded, record), expandedRowRender: expandedContent }} />
-      : <div className="students__mobile-list">{loading ? <div className="students__expanded-state"><Spin size="small" /> Ogrenciler yukleniyor...</div> : filtered.map((s) => <article className="students__mobile-card" key={s.id}><Flex justify="space-between"><strong>{s.fullName}</strong><StatusTag status={s.status} /></Flex><span><PhoneOutlined /> {s.phoneMasked}</span><span><IdcardOutlined /> {s.identityNumberMasked}</span><Flex justify="space-between" gap={8} wrap><Button onClick={() => toggleStudent(!expandedStudentIds.includes(s.id), s)}>{expandedStudentIds.includes(s.id) ? "Kurslari gizle" : "Kurslari goster"}</Button>{actions(s)}</Flex>{expandedStudentIds.includes(s.id) && expandedContent(s)}</article>)}</div>}
+      : <div className="students__mobile-list">{loading ? <div className="students__expanded-state"><Spin size="small" /> Ogrenciler yukleniyor...</div> : filtered.map((s) => <article className="students__mobile-card" key={s.id}><Flex justify="space-between"><strong>{s.fullName}</strong><StatusTag status={s.status} /></Flex><span><PhoneOutlined /> {s.phoneMasked}</span><span><IdcardOutlined /> {s.identityNumberMasked}</span><span>Kaydi alan: {optionalText(s.createdByFullName)}</span><Flex justify="space-between" gap={8} wrap><Button onClick={() => toggleStudent(!expandedStudentIds.includes(s.id), s)}>{expandedStudentIds.includes(s.id) ? "Kurslari gizle" : "Kurslari goster"}</Button>{actions(s)}</Flex>{expandedStudentIds.includes(s.id) && expandedContent(s)}</article>)}</div>}
     <DetailModal key={selected?.id ?? "closed"} student={selected} canReveal={canReveal} canRevealIdentityNumber={canRevealIdentityNumber} onClose={() => setSelected(undefined)} />
   </section>;
 }
@@ -390,7 +390,7 @@ function PaymentDetails({ enrollment }: { enrollment: StudentEnrollment }): JSX.
       { key: "start", label: enrollment.paymentPlan === "CASH" ? "Tahmini odeme" : "Ilk vade", children: formatOptionalDate(enrollment.paymentPlan === "CASH" ? enrollment.expectedPaymentDate : enrollment.firstPaymentDate) },
       { key: "note", label: "Not", span: 2, children: enrollment.note || "-" },
     ]} />
-    <section aria-labelledby={`payment-schedule-${enrollment.enrollmentId}`}><Typography.Title id={`payment-schedule-${enrollment.enrollmentId}`} level={5}>Odeme ve taksit plani</Typography.Title><Table rowKey="id" size="small" pagination={false} dataSource={enrollment.payments} scroll={{ x: 760 }} locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Odeme plani bulunmuyor." /> }} columns={[{ title: "Sira", render: (_, payment) => `${payment.installmentNumber}/${payment.installmentTotal}` }, { title: "Vade", dataIndex: "dueDate", render: formatOptionalDate }, { title: "Tutar", dataIndex: "amount", align: "right", render: (value) => currency.format(value) }, { title: "Durum", dataIndex: "status", render: (value: StudentEnrollment["paymentStatus"]) => <PaymentStatusTag status={value} /> }, { title: "Odeme tarihi", dataIndex: "paidAt", render: formatOptionalDate }, { title: "Tahsilat tipi", dataIndex: "paymentMethod", render: (value: EnrollmentPayment["paymentMethod"]) => value ? paymentMethodLabels[value] : "-" }]} /></section>
+    <section aria-labelledby={`payment-schedule-${enrollment.enrollmentId}`}><Typography.Title id={`payment-schedule-${enrollment.enrollmentId}`} level={5}>Odeme ve taksit plani</Typography.Title><Table rowKey="id" size="small" pagination={false} dataSource={enrollment.payments} scroll={{ x: 900 }} locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Odeme plani bulunmuyor." /> }} columns={[{ title: "Sira", render: (_, payment) => `${payment.installmentNumber}/${payment.installmentTotal}` }, { title: "Vade", dataIndex: "dueDate", render: formatOptionalDate }, { title: "Tutar", dataIndex: "amount", align: "right", render: (value) => currency.format(value) }, { title: "Durum", dataIndex: "status", render: (value: StudentEnrollment["paymentStatus"]) => <PaymentStatusTag status={value} /> }, { title: "Odeme tarihi", dataIndex: "paidAt", render: formatOptionalDate }, { title: "Tahsilat tipi", dataIndex: "paymentMethod", render: (value: EnrollmentPayment["paymentMethod"]) => value ? paymentMethodLabels[value] : "-" }, { title: "Odemeyi alan", render: (_, payment) => payment.status === "COMPLETED" ? optionalText(payment.receivedByFullName) : "-" }]} /></section>
   </div>;
 }
 

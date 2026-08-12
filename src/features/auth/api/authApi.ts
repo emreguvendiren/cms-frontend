@@ -43,7 +43,8 @@ function parseCsrfResponse(value: unknown): { token: string } {
 function parseLoginResponse(value: unknown): LoginResult {
   if (!isRecord(value) || typeof value.accessToken !== "string" || typeof value.tokenType !== "string" ||
       typeof value.expiresAt !== "string" || !isRecord(value.user) || typeof value.user.id !== "string" ||
-      typeof value.user.email !== "string" || !Array.isArray(value.user.authorities) ||
+      typeof value.user.email !== "string" || typeof value.user.fullName !== "string" ||
+      !Array.isArray(value.user.authorities) ||
       !value.user.authorities.every((item) => typeof item === "string")) {
     throw new Error("Geçersiz giriş yanıtı.");
   }
@@ -51,7 +52,7 @@ function parseLoginResponse(value: unknown): LoginResult {
     accessToken: value.accessToken,
     tokenType: value.tokenType,
     expiresAt: value.expiresAt,
-    user: { id: value.user.id, email: value.user.email, authorities: value.user.authorities },
+    user: { id: value.user.id, email: value.user.email, fullName: value.user.fullName, authorities: value.user.authorities },
   };
 }
 

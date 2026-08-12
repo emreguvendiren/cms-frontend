@@ -3,6 +3,7 @@ export type LoginCredentials = { email: string; password: string; rememberMe: bo
 export type AuthenticatedUser = {
   id: string;
   email: string;
+  fullName: string;
   authorities: string[];
 };
 

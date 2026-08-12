@@ -10,6 +10,7 @@ afterEach(() => cleanup());
 const administrator = {
   id: "user-1",
   email: "admin@ikiteknik.com",
+  fullName: "Admin User",
   authorities: ["ROLE_ADMIN"],
 };
 
