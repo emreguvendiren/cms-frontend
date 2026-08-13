@@ -27,6 +27,11 @@ export function App(): JSX.Element {
     return () => { active = false; };
   }, []);
 
+  const handleLogout = () => {
+    clearPageQueryParam();
+    setUser(null);
+  };
+
   if (restoringSession) {
     return <div className="app-loading" role="status" aria-label="Oturum kontrol ediliyor"><Spin size="large" /></div>;
   }
@@ -37,7 +42,14 @@ export function App(): JSX.Element {
 
   return (
     <Suspense fallback={<div className="app-loading" role="status" aria-label="Yönetim paneli yükleniyor"><Spin size="large" /></div>}>
-      <DashboardPage user={user} onLogout={() => setUser(null)} />
+      <DashboardPage user={user} onLogout={handleLogout} />
     </Suspense>
   );
+}
+
+function clearPageQueryParam() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("page")) return;
+  url.searchParams.delete("page");
+  window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
 }
